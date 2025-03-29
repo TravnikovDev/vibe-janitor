@@ -13,6 +13,7 @@ import {
 import path from 'path';
 import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
+import prompts from 'prompts';
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -45,6 +46,7 @@ function initCLI(): Command {
     .option('--log', 'Output detailed cleanup logs')
     .option('--quiet', 'No console output, just do the job')
     .option('--no-progress', 'Disable progress bars')
+    .option('--no-interactive', 'Skip interactive prompts')
     .action(async (directory, options) => {
       try {
         // Convert to absolute path
@@ -54,6 +56,30 @@ function initCLI(): Command {
         if (!fs.existsSync(targetDir)) {
           Logger.error(`Directory not found: ${targetDir}`);
           process.exit(1);
+        }
+
+        // Check if we need interactive prompts
+        // Only show interactive prompts when no explicit action flags are provided
+        // and interactive is not disabled
+        const hasExplicitOptions = Boolean(
+          options.removeUnused ||
+          options.dryRun ||
+          options.deepScrub ||
+          options.list ||
+          options.report ||
+          options.analyzeComplexity ||
+          options.analyzeDependencies ||
+          options.checkCircular ||
+          options.generateGraph
+        );
+
+        if (!hasExplicitOptions && options.interactive !== false) {
+          options = await promptForOptions(options, targetDir);
+          
+          // User cancelled the prompts
+          if (!options) {
+            process.exit(0);
+          }
         }
 
         if (!options.quiet) {
@@ -176,6 +202,66 @@ function initCLI(): Command {
     });
 
   return program;
+}
+
+/**
+ * Ask the user for cleanup options interactively
+ */
+async function promptForOptions(options: Record<string, unknown>, targetDir: string): Promise<Record<string, unknown> | null> {
+  console.log('\n🧹 Welcome to vibe-janitor interactive setup!\n');
+  console.log(`Target directory: ${targetDir}\n`);
+
+  try {
+    const responses = await prompts([
+      {
+        type: 'confirm',
+        name: 'removeUnused',
+        message: 'Clean up unused imports and code automatically?',
+        initial: true
+      },
+      {
+        type: 'confirm',
+        name: 'list',
+        message: 'Show detailed information about issues found?',
+        initial: true
+      },
+      {
+        type: 'confirm',
+        name: 'report',
+        message: 'Generate detailed reports (JSON and Markdown)?',
+        initial: false
+      },
+      {
+        type: 'confirm',
+        name: 'deepScrub',
+        message: 'Run advanced cleanup (assets, variables, functions)?',
+        initial: false
+      },
+      {
+        type: 'confirm',
+        name: 'analyzeDependencies',
+        message: 'Analyze package dependencies?',
+        initial: false
+      },
+      {
+        type: 'confirm',
+        name: 'checkCircular',
+        message: 'Check for circular dependencies?',
+        initial: false
+      }
+    ], {
+      onCancel: () => {
+        console.log('\n🚫 Operation cancelled by user');
+        return null;
+      }
+    });
+
+    // Merge the responses with the original options
+    return { ...options, ...responses };
+  } catch (error) {
+    console.error('Error during interactive prompts:', error);
+    return options; // Return original options if prompts fail
+  }
 }
 
 /**

@@ -49,11 +49,29 @@ npx vibe-janitor
 
 ## 💻 Usage
 
+### Interactive Mode
+
+By default, vibe-janitor runs in interactive mode when no options are provided:
+
+```bash
+npx vibe-janitor
+```
+
+This will prompt you with questions to configure the cleanup process:
+- Clean up unused imports and code automatically? (Y/n)
+- Show detailed information about issues found? (Y/n)
+- Generate detailed reports? (y/N)
+- Run advanced cleanup for assets, variables, and functions? (y/N)
+- Analyze package dependencies? (y/N)
+- Check for circular dependencies? (y/N)
+
+To skip interactive mode, use the `--no-interactive` flag or provide specific options.
+
 ### Basic Usage
 
 ```bash
 # Analyze current directory without making changes
-vibe-janitor
+vibe-janitor --dry-run
 
 # Get detailed list of unused imports and other issues
 vibe-janitor --list
