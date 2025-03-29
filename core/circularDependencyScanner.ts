@@ -33,18 +33,8 @@ export class CircularDependencyScanner {
     this.targetDir = targetDir;
     this.options = {
       verbose: options.verbose ?? false,
-      excludeRegExp: options.excludeRegExp ?? [
-        'node_modules',
-        'dist',
-        'build',
-        'coverage'
-      ],
-      fileExtensions: options.fileExtensions ?? [
-        'js',
-        'jsx',
-        'ts',
-        'tsx'
-      ],
+      excludeRegExp: options.excludeRegExp ?? ['node_modules', 'dist', 'build', 'coverage'],
+      fileExtensions: options.fileExtensions ?? ['js', 'jsx', 'ts', 'tsx'],
     };
   }
 
@@ -82,31 +72,33 @@ export class CircularDependencyScanner {
 
       // Run madge analysis
       const madgeResult = await madge(this.targetDir, madgeConfig);
-      
+
       // Get the dependency graph
       const dependencyGraph = madgeResult.obj();
       result.fileCount = Object.keys(dependencyGraph).length;
-      
+
       // Count total dependencies
       let dependencyCount = 0;
-      Object.values(dependencyGraph).forEach(deps => {
+      Object.values(dependencyGraph).forEach((deps) => {
         dependencyCount += (deps as string[]).length;
       });
       result.dependencyCount = dependencyCount;
-      
+
       // Detect circular dependencies
       const circularDeps = madgeResult.circular();
       result.circularDependencies = circularDeps;
-      
+
       if (this.options.verbose) {
-        Logger.info(`Found ${circularDeps.length} circular dependencies among ${result.fileCount} files`);
+        Logger.info(
+          `Found ${circularDeps.length} circular dependencies among ${result.fileCount} files`
+        );
       }
-      
+
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       Logger.error(`Circular dependency scan failed: ${errorMessage}`);
-      
+
       result.warnings.push(errorMessage);
       return result;
     }
@@ -119,17 +111,17 @@ export class CircularDependencyScanner {
     if (result.circularDependencies.length === 0) {
       return 'No circular dependencies found! 🎉';
     }
-    
+
     let report = '# Circular Dependency Report\n\n';
-    
+
     report += `Found ${result.circularDependencies.length} circular dependencies among ${result.fileCount} files.\n\n`;
-    
+
     report += '## Circular Dependencies\n\n';
-    
+
     result.circularDependencies.forEach((circle, index) => {
       report += `### Circular Dependency #${index + 1}\n\n`;
       report += 'File chain:\n\n';
-      
+
       circle.forEach((file, i) => {
         if (i === circle.length - 1) {
           report += `${i + 1}. \`${file}\` → cycles back to \`${circle[0]}\`\n`;
@@ -137,28 +129,28 @@ export class CircularDependencyScanner {
           report += `${i + 1}. \`${file}\` → imports \`${circle[i + 1]}\`\n`;
         }
       });
-      
+
       report += '\n**Recommended Fix:** Break this dependency cycle by:\n';
       report += '- Extracting shared logic to a separate module\n';
       report += '- Using dependency injection\n';
       report += '- Rethinking the component architecture\n\n';
     });
-    
+
     if (result.warnings.length > 0) {
       report += '## Warnings\n\n';
-      result.warnings.forEach(warning => {
+      result.warnings.forEach((warning) => {
         report += `- ${warning}\n`;
       });
       report += '\n';
     }
-    
+
     report += '## Impact\n\n';
     report += 'Circular dependencies can cause:\n\n';
     report += '- Unexpected behavior in module initialization\n';
     report += '- Problems with tree-shaking and bundle size\n';
     report += '- Difficulty in understanding and maintaining code\n';
     report += '- Testing challenges\n';
-    
+
     return report;
   }
 
@@ -175,10 +167,10 @@ export class CircularDependencyScanner {
 
       // Run madge analysis
       const madgeResult = await madge(this.targetDir, madgeConfig);
-      
+
       // Generate an SVG graph
       const svgGraph = await madgeResult.svg();
-      
+
       // Create an HTML file that displays the graph
       const html = `
 <!DOCTYPE html>
@@ -239,18 +231,20 @@ export class CircularDependencyScanner {
 </body>
 </html>
       `;
-      
+
       // Write the HTML file
       const outputPath = path.join(this.targetDir, 'dependency-graph.html');
       await fs.writeFile(outputPath, html);
-      
+
       if (this.options.verbose) {
         Logger.success(`Dependency graph generated: ${outputPath}`);
       }
-      
+
       return outputPath;
     } catch (error) {
-      Logger.error(`Failed to generate dependency graph: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(
+        `Failed to generate dependency graph: ${error instanceof Error ? error.message : String(error)}`
+      );
       return null;
     }
   }

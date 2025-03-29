@@ -51,7 +51,7 @@ export class Analyzer {
       maxNestingDepth: options.maxNestingDepth ?? 4,
       verbose: options.verbose ?? false,
     };
-    
+
     this.project = new Project({
       tsConfigFilePath: this.findTsConfig(),
       skipAddingFilesFromTsConfig: true,
@@ -76,24 +76,26 @@ export class Analyzer {
     try {
       const filePatterns = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'];
       const ignorePatterns = ['**/node_modules/**', '**/dist/**', '**/build/**', '**/*.d.ts'];
-      
-      const files = await import('fast-glob').then(fg => 
+
+      const files = await import('fast-glob').then((fg) =>
         fg.default.sync(filePatterns, {
           cwd: this.targetDir,
           ignore: ignorePatterns,
           absolute: true,
         })
       );
-      
+
       if (this.options.verbose) {
         Logger.info(`Found ${files.length} files to analyze for complexity`);
       }
-      
-      files.forEach(file => {
+
+      files.forEach((file) => {
         this.project.addSourceFileAtPath(file);
       });
     } catch (error) {
-      Logger.error(`Failed to add files to complexity analysis: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(
+        `Failed to add files to complexity analysis: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -105,26 +107,25 @@ export class Analyzer {
     const text = sourceFile.getText();
     const lines = text.split('\n');
     const lineCount = lines.length;
-    
+
     const functions = sourceFile.getFunctions();
-    const methods = sourceFile.getClasses()
-      .flatMap(cls => cls.getMethods());
-    
+    const methods = sourceFile.getClasses().flatMap((cls) => cls.getMethods());
+
     const allFunctions = [...functions, ...methods];
-    
+
     // Find long functions
     const longFunctions = allFunctions
-      .map(func => {
+      .map((func) => {
         const funcText = func.getText();
         const funcLines = funcText.split('\n').length;
         const name = func.getName() ?? 'anonymous';
         return { name, lineCount: funcLines };
       })
-      .filter(func => func.lineCount > this.options.maxFunctionLength!);
-    
+      .filter((func) => func.lineCount > this.options.maxFunctionLength!);
+
     // Calculate nesting depth (simplified approach)
     const deepNesting: { location: string; depth: number }[] = [];
-    
+
     // This is a simplistic approach - a real implementation would use AST traversal
     // to accurately determine nesting depth
     const calculateNestingDepth = (code: string): void => {
@@ -132,20 +133,20 @@ export class Analyzer {
       let currentDepth = 0;
       let maxDepth = 0;
       let maxDepthLine = 0;
-      
+
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const openBraces = (line.match(/{/g) ?? []).length;
         const closeBraces = (line.match(/}/g) ?? []).length;
-        
+
         currentDepth += openBraces - closeBraces;
-        
+
         if (currentDepth > maxDepth) {
           maxDepth = currentDepth;
           maxDepthLine = i + 1;
         }
       }
-      
+
       if (maxDepth > this.options.maxNestingDepth!) {
         deepNesting.push({
           location: `line ${maxDepthLine}`,
@@ -153,20 +154,18 @@ export class Analyzer {
         });
       }
     };
-    
+
     // Calculate nesting depth for each function
-    allFunctions.forEach(func => {
+    allFunctions.forEach((func) => {
       const funcText = func.getText();
       calculateNestingDepth(funcText);
     });
-    
+
     // Calculate overall complexity (a simple heuristic for now)
     const complexity = Math.floor(
-      (lineCount / 100) + 
-      (longFunctions.length * 5) + 
-      (deepNesting.length * 10)
+      lineCount / 100 + longFunctions.length * 5 + deepNesting.length * 10
     );
-    
+
     return {
       filePath,
       lineCount,
@@ -182,33 +181,33 @@ export class Analyzer {
    */
   private findLargeFiles(sourceFiles: SourceFile[]): FileComplexity[] {
     const largeFiles: FileComplexity[] = [];
-    
+
     for (const sourceFile of sourceFiles) {
       const complexity = this.calculateFileComplexity(sourceFile);
-      
+
       if (complexity.lineCount > this.options.maxLineCount!) {
         largeFiles.push(complexity);
       }
     }
-    
+
     return largeFiles.sort((a, b) => b.lineCount - a.lineCount);
   }
 
   /**
    * Find complex functions
    */
-  private findComplexFunctions(sourceFiles: SourceFile[]): { 
-    filePath: string; 
-    functions: { name: string; lineCount: number }[] 
+  private findComplexFunctions(sourceFiles: SourceFile[]): {
+    filePath: string;
+    functions: { name: string; lineCount: number }[];
   }[] {
-    const result: { 
-      filePath: string; 
-      functions: { name: string; lineCount: number }[] 
+    const result: {
+      filePath: string;
+      functions: { name: string; lineCount: number }[];
     }[] = [];
-    
+
     for (const sourceFile of sourceFiles) {
       const complexity = this.calculateFileComplexity(sourceFile);
-      
+
       if (complexity.longFunctions.length > 0) {
         result.push({
           filePath: complexity.filePath,
@@ -216,25 +215,25 @@ export class Analyzer {
         });
       }
     }
-    
+
     return result;
   }
 
   /**
    * Find deeply nested code
    */
-  private findDeeplyNestedCode(sourceFiles: SourceFile[]): { 
-    filePath: string; 
-    locations: { location: string; depth: number }[] 
+  private findDeeplyNestedCode(sourceFiles: SourceFile[]): {
+    filePath: string;
+    locations: { location: string; depth: number }[];
   }[] {
-    const result: { 
-      filePath: string; 
-      locations: { location: string; depth: number }[] 
+    const result: {
+      filePath: string;
+      locations: { location: string; depth: number }[];
     }[] = [];
-    
+
     for (const sourceFile of sourceFiles) {
       const complexity = this.calculateFileComplexity(sourceFile);
-      
+
       if (complexity.deepNesting.length > 0) {
         result.push({
           filePath: complexity.filePath,
@@ -242,7 +241,7 @@ export class Analyzer {
         });
       }
     }
-    
+
     return result;
   }
 
@@ -267,19 +266,19 @@ export class Analyzer {
     };
 
     await this.addFilesToProject();
-    
+
     const sourceFiles = this.project.getSourceFiles();
-    
+
     if (this.options.verbose) {
       Logger.info('Analyzing code complexity...');
     }
-    
+
     // Run the analysis
     result.largeFiles = this.findLargeFiles(sourceFiles);
     result.complexFunctions = this.findComplexFunctions(sourceFiles);
     result.deeplyNested = this.findDeeplyNestedCode(sourceFiles);
     result.circularDependencies = this.findCircularDependencies();
-    
+
     return result;
   }
 }

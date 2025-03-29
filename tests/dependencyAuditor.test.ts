@@ -23,16 +23,16 @@ describe('DependencyAuditor Module', () => {
       name: 'test-project',
       version: '1.0.0',
       dependencies: {
-        'lodash': '^4.17.21',
-        'react': '^17.0.2',
-        'unused-package': '^1.0.0'
+        lodash: '^4.17.21',
+        react: '^17.0.2',
+        'unused-package': '^1.0.0',
       },
       devDependencies: {
-        'jest': '^27.0.0',
-        'unused-dev-package': '^1.0.0'
-      }
+        jest: '^27.0.0',
+        'unused-dev-package': '^1.0.0',
+      },
     };
-    
+
     // Create a mock source file that uses only some dependencies
     const indexJs = `
       import React from 'react';
@@ -44,24 +44,24 @@ describe('DependencyAuditor Module', () => {
       
       render(<App />, document.getElementById('root'));
     `;
-    
+
     // Write files to the test directory
     await fs.writeJSON(path.join(testDir, 'package.json'), packageJson);
     await fs.writeFile(path.join(testDir, 'index.js'), indexJs);
-    
+
     // Run the dependency auditor
     const auditor = new DependencyAuditor(testDir);
     const result = await auditor.audit();
-    
+
     // Verify that unused dependencies were detected
     // Note: In a real test environment with actual depcheck execution,
     // we would expect these assertions to pass, but in this test setup
     // they might not work as expected without mocking depcheck
     expect(result).toBeDefined();
-    
+
     // Generate cleanup instructions
     const instructions = auditor.generateCleanupInstructions(result);
-    
+
     // Verify that instructions were generated
     expect(instructions).toBeDefined();
     expect(instructions).toContain('Dependency Cleanup Instructions');
