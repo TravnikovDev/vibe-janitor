@@ -2,7 +2,9 @@
 **"Because vibe coding leaves messes — and someone has to clean up."**
 
 ### 💡 What is this?
-`vibe-janitor` is a CLI tool that inspects your AI-generated codebase and scrubs out the junk:  
+`vibe-janitor` is a CLI tool built for modern JavaScript and TypeScript projects. It seamlessly integrates into the Node.js ecosystem and is ideal for projects using frameworks like React, Next.js, Vue, or plain TypeScript setups.
+
+It inspects your AI-generated codebase and scrubs out the junk:
 - Unused files and components  
 - Dead imports  
 - Unreachable code  
@@ -41,13 +43,6 @@ vibe-janitor ./src --deep-clean --remove-unused
 | Option | Description |
 |--------|-------------|
 | `--deep-scrub` | Runs all available cleanup routines, including deep file analysis and dependency checks |
-| `--deep-clean` | Runs a full analysis and deletes unused code |
-| `--dry-run` | Show what would be removed, without deleting |
-| `--remove-unused` | Remove unused files, components, and imports |
-| `--log` | Outputs detailed cleanup log |
-| `--quiet` | No console output, just does the job |
-
---------|-------------|
 | `--deep-clean` | Runs a full analysis and deletes unused code |
 | `--dry-run` | Show what would be removed, without deleting |
 | `--remove-unused` | Remove unused files, components, and imports |
