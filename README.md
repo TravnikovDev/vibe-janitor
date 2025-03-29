@@ -1,19 +1,31 @@
 # vibe-janitor 🧹
 
-A powerful CLI tool for cleaning up AI-generated JavaScript and TypeScript projects.
+<p align="center">
+  <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
+  <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
+  <img src="https://img.shields.io/github/license/TravnikovDev/vibe-janitor.svg" alt="license">
+</p>
+
+<p align="center">
+  <b>Clean up AI-generated JavaScript/TypeScript projects efficiently and intelligently</b>
+</p>
+
+<p align="center">
+  <img width="600" src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/docs/vibe-janitor-banner.png" alt="vibe-janitor banner">
+</p>
 
 ## 🌟 Overview
 
-When AI tools like GitHub Copilot, ChatGPT, or Claude generate code, they often include unused imports, variables, functions, and assets. The vibe-janitor tool automatically identifies and removes these unwanted artifacts, making your project cleaner and more efficient.
+AI tools like GitHub Copilot, ChatGPT, or Claude often generate code with unused imports, variables, functions, and assets. **vibe-janitor** automatically identifies and removes these unwanted artifacts, making your codebase cleaner and more efficient.
 
 ## ✨ Features
 
-- **Unused Code Cleanup**: Detect and remove unused imports, variables, and functions
-- **Asset Management**: Find and report unused static files (images, CSS, etc.)
-- **Complexity Analysis**: Identify overly complex files, functions, and deeply nested code
-- **Dependency Checking**: Discover unused packages and circular dependencies
-- **Dry Run Mode**: Preview changes without modifying files
-- **Detailed Reports**: Get comprehensive reports of all cleaning activities
+- **🧹 Unused Code Cleanup**: Detect and remove unused imports, variables, and functions
+- **🖼️ Asset Management**: Find and report unused static files (images, CSS, etc.)
+- **📊 Complexity Analysis**: Identify overly complex files, functions, and deeply nested code
+- **📦 Dependency Checking**: Discover unused packages and circular dependencies
+- **🔍 Dry Run Mode**: Preview changes without modifying files
+- **📝 Detailed Reports**: Get comprehensive reports of all cleaning activities
 
 ## 🚀 Installation
 
@@ -29,35 +41,45 @@ npm install -g vibe-janitor
 npm install --save-dev vibe-janitor
 ```
 
+### Quick Try with npx
+
+```bash
+npx vibe-janitor
+```
+
 ## 💻 Usage
 
 ### Basic Usage
 
 ```bash
-# Clean current directory
+# Analyze current directory without making changes
 vibe-janitor
 
+# Get detailed list of unused imports and other issues
+vibe-janitor --list
+
+# Remove unused imports and code
+vibe-janitor --remove-unused
+
 # Clean a specific directory
-vibe-janitor ./path/to/project
+vibe-janitor ./path/to/project --remove-unused
 ```
 
 ### Command Options
 
 ```bash
-# Show what would be removed without making changes
-vibe-janitor --dry-run
-
-# Remove all unused code and assets
-vibe-janitor --remove-unused 
-
-# Run all cleanup routines (deeper analysis)
-vibe-janitor --deep-scrub
-
-# Detailed console output
-vibe-janitor --log
-
-# No console output
-vibe-janitor --quiet
+  --deep-scrub            Run all available cleanup routines
+  --dry-run               Show what would be removed without deleting anything
+  --remove-unused         Remove unused files, components, and imports
+  --list                  List detailed information about unused imports and other issues
+  --report [path]         Generate detailed reports (JSON and Markdown)
+  --analyze-complexity    Analyze code complexity
+  --analyze-dependencies  Analyze package dependencies
+  --check-circular        Check for circular dependencies
+  --generate-graph        Generate dependency graph visualization
+  --log                   Output detailed cleanup logs
+  --quiet                 No console output, just do the job
+  --no-progress           Disable progress bars
 ```
 
 ### Using in package.json scripts
@@ -65,31 +87,54 @@ vibe-janitor --quiet
 ```json
 {
   "scripts": {
-    "clean": "vibe-janitor",
-    "clean:deep": "vibe-janitor --deep-scrub"
+    "clean": "vibe-janitor --list",
+    "clean:fix": "vibe-janitor --remove-unused",
+    "clean:deep": "vibe-janitor --deep-scrub --remove-unused"
   }
 }
 ```
 
 ## 📊 Example Output
 
+<p align="center">
+  <img width="700" src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/docs/vibe-janitor-demo.png" alt="vibe-janitor demo output">
+</p>
+
+### Detailed Mode Output
+
+With the new `--list` option, you get detailed information about what needs to be cleaned:
+
 ```
-🧹 vibe-janitor activated...
-Sweeping up leftover GPT magic ✨
+📝 Cleanup Summary:
+  - Unused imports: 33 across 22 files
 
-✅ Found 12 unused imports
-✅ Found 8 unused variables
-✅ Found 3 unused files
-✅ Found 2 unused packages
+    📋 Unused imports details:
+    - components/Header.tsx (2 unused):
+      • useState
+      • useEffect
+    - pages/index.tsx (3 unused):
+      • Image
+      • Head
+      • styles
+    ...
 
-📝 Summary:
-  - Removed 12 unused imports across 5 files
-  - Removed 8 unused variables
-  - Removed 3 unused files
-  - Suggested removing 2 packages from package.json
-
-Cleanup complete! 🎉
+    💡 To fix these issues, run: npx vibe-janitor --remove-unused
 ```
+
+## 🗂️ Generated Reports
+
+Using the `--report` option generates detailed markdown and JSON reports:
+
+```bash
+vibe-janitor --report
+```
+
+This creates reports in the `vibe-janitor-report/` directory:
+
+- `vibe-janitor-report-main.md`: Human-readable report
+- `vibe-janitor-report-main.json`: Machine-readable report
+- `vibe-janitor-report-dependencies.md`: Dependency analysis
+- `vibe-janitor-report-circular.md`: Circular dependency analysis
 
 ## 🛠️ Contributing
 
@@ -109,4 +154,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - The TypeScript team for the TS Compiler API
 - ts-morph for making AST manipulation easier
+- depcheck for dependency analysis
 

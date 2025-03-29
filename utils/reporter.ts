@@ -54,7 +54,8 @@ export class Reporter {
    */
   public generateConsoleSummary(
     cleanerResult: CleaningResult,
-    assetResult?: AssetSweepResult
+    assetResult?: AssetSweepResult,
+    showDetailed: boolean = false
   ): void {
     Logger.log('\n📝 Cleanup Summary:');
 
@@ -75,16 +76,77 @@ export class Reporter {
     Logger.log(
       `  - Unused imports: ${totalImports} across ${cleanerResult.unusedImports.length} files`
     );
+    
+    // Show detailed imports info if requested
+    if (showDetailed && cleanerResult.unusedImports.length > 0) {
+      Logger.log('\n    📋 Unused imports details:');
+      cleanerResult.unusedImports.forEach(file => {
+        const relativePath = file.file.split('/').slice(-3).join('/'); // Show last 3 path segments for brevity
+        Logger.log(`    - ${relativePath} (${file.imports.length} unused):`);
+        file.imports.forEach(importName => {
+          Logger.log(`      • ${importName}`);
+        });
+      });
+      
+      if (!cleanerResult.modifiedFiles.length) {
+        Logger.log('\n    💡 To fix these issues, run: npx vibe-janitor --remove-unused');
+      }
+    }
+
     Logger.log(
       `  - Unused variables: ${totalVariables} across ${cleanerResult.unusedVariables.length} files`
     );
+    
+    // Show detailed variables info if requested
+    if (showDetailed && cleanerResult.unusedVariables.length > 0) {
+      Logger.log('\n    📋 Unused variables details:');
+      cleanerResult.unusedVariables.forEach(file => {
+        const relativePath = file.file.split('/').slice(-3).join('/');
+        Logger.log(`    - ${relativePath} (${file.variables.length} unused):`);
+        file.variables.forEach(varName => {
+          Logger.log(`      • ${varName}`);
+        });
+      });
+    }
+
     Logger.log(
       `  - Unused functions: ${totalFunctions} across ${cleanerResult.unusedFunctions.length} files`
     );
+    
+    // Show detailed functions info if requested
+    if (showDetailed && cleanerResult.unusedFunctions.length > 0) {
+      Logger.log('\n    📋 Unused functions details:');
+      cleanerResult.unusedFunctions.forEach(file => {
+        const relativePath = file.file.split('/').slice(-3).join('/');
+        Logger.log(`    - ${relativePath} (${file.functions.length} unused):`);
+        file.functions.forEach(funcName => {
+          Logger.log(`      • ${funcName}`);
+        });
+      });
+    }
+
     Logger.log(`  - Potentially unused files: ${cleanerResult.unusedFiles.length}`);
+    
+    // Show detailed unused files if requested
+    if (showDetailed && cleanerResult.unusedFiles.length > 0) {
+      Logger.log('\n    📋 Potentially unused files:');
+      cleanerResult.unusedFiles.forEach(file => {
+        const relativePath = file.split('/').slice(-3).join('/');
+        Logger.log(`    - ${relativePath}`);
+      });
+    }
 
     if (cleanerResult.modifiedFiles.length > 0) {
       Logger.log(`  - Modified ${cleanerResult.modifiedFiles.length} files`);
+      
+      // Show modified files if requested
+      if (showDetailed) {
+        Logger.log('\n    📋 Modified files:');
+        cleanerResult.modifiedFiles.forEach(file => {
+          const relativePath = file.split('/').slice(-3).join('/');
+          Logger.log(`    - ${relativePath}`);
+        });
+      }
     }
 
     // Asset results
@@ -101,6 +163,56 @@ export class Reporter {
       if (assetResult.deletedAssets.length > 0) {
         Logger.log(`  - Deleted ${assetResult.deletedAssets.length} assets`);
       }
+      
+      // Show detailed asset info if requested
+      if (showDetailed && 
+          (assetResult.unusedImages.length > 0 || 
+           assetResult.unusedFonts.length > 0 || 
+           assetResult.unusedStyles.length > 0)) {
+        
+        if (assetResult.unusedImages.length > 0) {
+          Logger.log('\n    📋 Unused images:');
+          assetResult.unusedImages.forEach(image => {
+            const relativePath = image.split('/').slice(-3).join('/');
+            Logger.log(`    - ${relativePath}`);
+          });
+        }
+        
+        if (assetResult.unusedFonts.length > 0) {
+          Logger.log('\n    📋 Unused fonts:');
+          assetResult.unusedFonts.forEach(font => {
+            const relativePath = font.split('/').slice(-3).join('/');
+            Logger.log(`    - ${relativePath}`);
+          });
+        }
+        
+        if (assetResult.unusedStyles.length > 0) {
+          Logger.log('\n    📋 Unused style files:');
+          assetResult.unusedStyles.forEach(style => {
+            const relativePath = style.split('/').slice(-3).join('/');
+            Logger.log(`    - ${relativePath}`);
+          });
+        }
+        
+        if (!assetResult.deletedAssets.length) {
+          Logger.log('\n    💡 To remove these unused assets, run: npx vibe-janitor --deep-scrub --remove-unused');
+        }
+      }
+    }
+    
+    // Show general help if issues were found but not fixed
+    if ((totalImports > 0 || totalVariables > 0 || totalFunctions > 0 || 
+         cleanerResult.unusedFiles.length > 0 || 
+         (assetResult && 
+          (assetResult.unusedImages.length > 0 || 
+           assetResult.unusedFonts.length > 0 || 
+           assetResult.unusedStyles.length > 0))) && 
+        cleanerResult.modifiedFiles.length === 0 && 
+        (!assetResult || assetResult.deletedAssets.length === 0) && 
+        !showDetailed) {
+      
+      Logger.log('\n💡 For detailed information on these issues, run: npx vibe-janitor --list');
+      Logger.log('💡 To automatically fix these issues, run: npx vibe-janitor --remove-unused');
     }
   }
 

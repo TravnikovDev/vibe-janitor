@@ -36,6 +36,7 @@ function initCLI(): Command {
     .option('--deep-scrub', 'Run all available cleanup routines')
     .option('--dry-run', 'Show what would be removed without deleting anything')
     .option('--remove-unused', 'Remove unused files, components, and imports')
+    .option('--list', 'List detailed information about unused imports and other issues')
     .option('--report [path]', 'Generate detailed reports (JSON and Markdown)')
     .option('--analyze-complexity', 'Analyze code complexity')
     .option('--analyze-dependencies', 'Analyze package dependencies')
@@ -80,7 +81,7 @@ function initCLI(): Command {
             verbose: options.log,
           });
 
-          reporter.generateConsoleSummary(results.cleanerResult, results.assetResult);
+          reporter.generateConsoleSummary(results.cleanerResult, results.assetResult, Boolean(options.list));
 
           // Show dependency analysis if requested
           if (options.analyzeDependencies && results.dependencyResult) {
