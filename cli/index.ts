@@ -40,6 +40,7 @@ function initCLI() {
     .option('--generate-graph', 'Generate dependency graph visualization')
     .option('--log', 'Output detailed cleanup logs')
     .option('--quiet', 'No console output, just do the job')
+    .option('--no-progress', 'Disable progress bars')
     .action(async (directory, options) => {
       try {
         // Convert to absolute path
@@ -59,8 +60,14 @@ function initCLI() {
           }
         }
 
-        // Run the core cleaning modules
-        const results = await runCleanupModules(targetDir, options);
+        // Run the core cleaning modules with progress bars if not disabled
+        const results = options.noProgress || options.quiet
+          ? await runCleanupModules(targetDir, options)
+          : await Logger.runWithProgress(
+              () => runCleanupModules(targetDir, options),
+              3,
+              ['Analyzing project', 'Cleaning code', 'Processing results']
+            );
         
         if (!options.quiet) {
           // Generate console summary
