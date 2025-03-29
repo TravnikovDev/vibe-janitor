@@ -9,12 +9,12 @@
 
 **Objectives:** Set up project infrastructure, baseline CLI, and module scaffolding.
 
-- [] Project initialization with TypeScript, ESLint, Prettier
-- [] Set up basic CLI with Commander.js
-- [] Establish file/folder structure (`/cli`, `/core`, `/utils`, `/tests`)
-- [] Configure Jest for testing
-- [] Set up CI (GitHub Actions or similar)
-- [] Publish MVP README with project purpose and install instructions
+- [x] Project initialization with TypeScript, ESLint, Prettier
+- [x] Set up basic CLI with Commander.js
+- [x] Establish file/folder structure (`/cli`, `/core`, `/utils`, `/tests`)
+- [x] Configure Jest for testing
+- [ ] Set up CI (GitHub Actions or similar)
+- [ ] Publish MVP README with project purpose and install instructions
 
 **Deliverables:** Repo scaffold, working `npx vibe-janitor` entry point
 

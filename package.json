@@ -1,0 +1,53 @@
+{
+  "name": "vibe-janitor",
+  "version": "0.1.0",
+  "description": "A CLI tool that cleans AI-generated JavaScript/TypeScript projects",
+  "main": "dist/cli/index.js",
+  "type": "module",
+  "bin": {
+    "vibe-janitor": "dist/cli/index.js"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"**/*.ts\"",
+    "start": "node dist/cli/index.js",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TravnikovDev/vibe-janitor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TravnikovDev/vibe-janitor/issues"
+  },
+  "homepage": "https://github.com/TravnikovDev/vibe-janitor#readme",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "fast-glob": "^3.3.3",
+    "fs-extra": "^11.3.0",
+    "ts-morph": "^25.0.1",
+    "typescript": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.14",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "eslint": "^9.23.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.0"
+  }
+}
