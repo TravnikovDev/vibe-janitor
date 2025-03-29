@@ -15,6 +15,9 @@ out/
 # Testing
 coverage/
 
+# Generated reports
+vibe-janitor-report/
+
 # OS-specific files
 .DS_Store
 Thumbs.db

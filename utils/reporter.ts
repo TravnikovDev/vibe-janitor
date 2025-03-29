@@ -19,6 +19,7 @@ export interface ReporterOptions {
  */
 export class Reporter {
   private options: ReporterOptions;
+  private reportDir: string;
 
   constructor(options: ReporterOptions = {}) {
     this.options = {
@@ -27,6 +28,23 @@ export class Reporter {
       generateMarkdown: options.generateMarkdown !== undefined ? options.generateMarkdown : true,
       verbose: options.verbose || false,
     };
+    
+    // Ensure we always use the vibe-janitor-report directory regardless of the output path
+    this.reportDir = 'vibe-janitor-report';
+  }
+
+  /**
+   * Ensure report directory exists
+   */
+  private async ensureReportDirectory(): Promise<void> {
+    try {
+      await fs.ensureDir(this.reportDir);
+      if (this.options.verbose) {
+        Logger.info(`Report directory created: ${this.reportDir}`);
+      }
+    } catch (error) {
+      Logger.error(`Failed to create report directory: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   /**
@@ -94,6 +112,9 @@ export class Reporter {
       return '';
     }
     
+    // Ensure report directory exists
+    await this.ensureReportDirectory();
+    
     const report = {
       timestamp: new Date().toISOString(),
       codeCleanup: {
@@ -112,7 +133,10 @@ export class Reporter {
       } : undefined,
     };
     
-    const reportPath = `${this.options.outputPath}.json`;
+    // Create filename with proper prefix in the report directory
+    const outputPath = this.options.outputPath || 'vibe-janitor-report';
+    const filename = `${path.basename(outputPath)}-main.json`;
+    const reportPath = path.join(this.reportDir, filename);
     
     try {
       await fs.outputJson(reportPath, report, { spaces: 2 });
@@ -135,6 +159,9 @@ export class Reporter {
     if (!this.options.generateMarkdown) {
       return '';
     }
+    
+    // Ensure report directory exists
+    await this.ensureReportDirectory();
     
     // Build the report content
     let markdown = `# Vibe Janitor Cleanup Report\n\n`;
@@ -277,8 +304,10 @@ export class Reporter {
       }
     }
     
-    // Write the report to a file
-    const reportPath = `${this.options.outputPath}.md`;
+    // Create filename with proper prefix in the report directory
+    const outputPath = this.options.outputPath || 'vibe-janitor-report';
+    const filename = `${path.basename(outputPath)}-main.md`;
+    const reportPath = path.join(this.reportDir, filename);
     
     try {
       await fs.outputFile(reportPath, markdown);

@@ -9,9 +9,14 @@ import { DependencyAuditor } from '../core/dependencyAuditor.js';
 import { CircularDependencyScanner } from '../core/circularDependencyScanner.js';
 import path from 'path';
 import fs from 'fs-extra';
+import { fileURLToPath } from 'url';
 
-// Get package version from package.json
-const packageJsonPath = new URL('../package.json', import.meta.url);
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Get package version from package.json (resolve from project root)
+const packageJsonPath = path.resolve(__dirname, '..', '..', 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
 const program = new Command();
@@ -77,9 +82,18 @@ function initCLI() {
             if (options.report) {
               const dependencyAuditor = new DependencyAuditor(targetDir);
               const instructions = dependencyAuditor.generateCleanupInstructions(results.dependencyResult);
-              const depReportPath = options.report === true ? 'dependency-cleanup' : `${options.report}-dependencies`;
-              await fs.outputFile(`${depReportPath}.md`, instructions);
-              Logger.info(`- Dependency cleanup instructions: ${depReportPath}.md`);
+              
+              // Always use vibe-janitor-report directory for consistency
+              const reportDirName = 'vibe-janitor-report';
+              const reportBaseName = path.basename(options.report === true ? 'vibe-janitor-report' : options.report);
+              const depReportFileName = `${reportBaseName}-dependencies.md`;
+              const depReportPath = path.join(reportDirName, depReportFileName);
+              
+              // Ensure the directory exists
+              await fs.ensureDir(reportDirName);
+              await fs.outputFile(depReportPath, instructions);
+              
+              Logger.info(`- Dependency cleanup instructions: ${depReportPath}`);
             }
           }
           
@@ -93,9 +107,18 @@ function initCLI() {
             if (options.report) {
               const circularScanner = new CircularDependencyScanner(targetDir);
               const report = circularScanner.generateReport(results.circularResult);
-              const circReportPath = options.report === true ? 'circular-dependencies' : `${options.report}-circular`;
-              await fs.outputFile(`${circReportPath}.md`, report);
-              Logger.info(`- Circular dependency report: ${circReportPath}.md`);
+              
+              // Always use vibe-janitor-report directory for consistency
+              const reportDirName = 'vibe-janitor-report';
+              const reportBaseName = path.basename(options.report === true ? 'vibe-janitor-report' : options.report);
+              const circReportFileName = `${reportBaseName}-circular.md`;
+              const circReportPath = path.join(reportDirName, circReportFileName);
+              
+              // Ensure the directory exists
+              await fs.ensureDir(reportDirName);
+              await fs.outputFile(circReportPath, report);
+              
+              Logger.info(`- Circular dependency report: ${circReportPath}`);
             }
           }
           
