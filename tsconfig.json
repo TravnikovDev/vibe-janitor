@@ -12,6 +12,6 @@
     "declaration": true,
     "resolveJsonModule": true
   },
-  "include": ["cli/**/*", "core/**/*", "utils/**/*", "tests/**/*"],
+  "include": ["cli/**/*", "core/**/*", "utils/**/*", "tests/**/*", "types/**/*"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,115 +1,112 @@
-## 🧹 `vibe-janitor`  
-**"Because vibe coding leaves messes — and someone has to clean up."**
+# vibe-janitor 🧹
 
-### 💡 What is this?
-`vibe-janitor` is a CLI tool built for modern JavaScript and TypeScript projects. It seamlessly integrates into the Node.js ecosystem and is ideal for projects using frameworks like React, Next.js, Vue, or plain TypeScript setups.
+A powerful CLI tool for cleaning up AI-generated JavaScript and TypeScript projects.
 
-It inspects your AI-generated codebase and scrubs out the junk:
-- Unused files and components  
-- Dead imports  
-- Unreachable code  
-- Redundant logic  
-- All that leftover spaghetti from GPT’s last mood swing 🍝  
+## 🌟 Overview
 
-Think of it as the cleanup crew that shows up after your AI "finished" the project.
+When AI tools like GitHub Copilot, ChatGPT, or Claude generate code, they often include unused imports, variables, functions, and assets. The vibe-janitor tool automatically identifies and removes these unwanted artifacts, making your project cleaner and more efficient.
 
----
+## ✨ Features
 
-### 🚀 Install
+- **Unused Code Cleanup**: Detect and remove unused imports, variables, and functions
+- **Asset Management**: Find and report unused static files (images, CSS, etc.)
+- **Complexity Analysis**: Identify overly complex files, functions, and deeply nested code
+- **Dependency Checking**: Discover unused packages and circular dependencies
+- **Dry Run Mode**: Preview changes without modifying files
+- **Detailed Reports**: Get comprehensive reports of all cleaning activities
+
+## 🚀 Installation
+
+### Global Installation
 
 ```bash
 npm install -g vibe-janitor
 ```
 
-Or use it directly with npx:
+### Local Project Installation
 
 ```bash
-npx vibe-janitor
+npm install --save-dev vibe-janitor
 ```
 
----
+## 💻 Usage
 
-### 🧼 Usage
+### Basic Usage
 
 ```bash
-vibe-janitor [options]
+# Clean current directory
+vibe-janitor
 
-# Example
-vibe-janitor ./src --deep-clean --remove-unused
+# Clean a specific directory
+vibe-janitor ./path/to/project
 ```
 
-### 🛠️ Options
+### Command Options
 
-| Option | Description |
-|--------|-------------|
-| `--deep-scrub` | Runs all available cleanup routines, including deep file analysis and dependency checks |
-| `--deep-clean` | Runs a full analysis and deletes unused code |
-| `--dry-run` | Show what would be removed, without deleting |
-| `--remove-unused` | Remove unused files, components, and imports |
-| `--log` | Outputs detailed cleanup log |
-| `--quiet` | No console output, just does the job |
+```bash
+# Show what would be removed without making changes
+vibe-janitor --dry-run
 
----
+# Remove all unused code and assets
+vibe-janitor --remove-unused 
 
-### ✨ CLI Welcome Message (when someone runs it):
+# Run all cleanup routines (deeper analysis)
+vibe-janitor --deep-scrub
+
+# Detailed console output
+vibe-janitor --log
+
+# No console output
+vibe-janitor --quiet
+```
+
+### Using in package.json scripts
+
+```json
+{
+  "scripts": {
+    "clean": "vibe-janitor",
+    "clean:deep": "vibe-janitor --deep-scrub"
+  }
+}
+```
+
+## 📊 Example Output
 
 ```
 🧹 vibe-janitor activated...
 Sweeping up leftover GPT magic ✨
 
-Scanning for:
-  🚫 Unused files
-  🔗 Dead imports
-  🧟 Zombie components
-  🐍 Spaghetti logic
+✅ Found 12 unused imports
+✅ Found 8 unused variables
+✅ Found 3 unused files
+✅ Found 2 unused packages
 
-Running cleanup in: ./src
-(Use --dry-run to preview changes before sweeping)
+📝 Summary:
+  - Removed 12 unused imports across 5 files
+  - Removed 8 unused variables
+  - Removed 3 unused files
+  - Suggested removing 2 packages from package.json
 
-Let’s make your vibe-coded mess look like a real project 👨‍💻🧼
+Cleanup complete! 🎉
 ```
 
----
+## 🛠️ Contributing
 
-### 🔍 What It Does
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-`vibe-janitor` is modular and powerful — here's what it will do (or already does, depending on your version):
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-#### 🧼 Unused Code & Asset Cleaner
-- Detects and removes unused CSS styles
-- Finds unused JS/TS functions and variables
-- Identifies unreferenced images, fonts, and static assets
+## 📝 License
 
-#### 📏 Large & Complex File Analyzer
-- Flags files over a configurable line count (default: 500)
-- Highlights large functions for refactoring
-- Ranks the most complex files in your codebase
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-#### 📦 Dependency & Import Optimizer
-- Identifies unused `package.json` dependencies
-- Suggests lighter alternatives for heavy libraries
-- Warns about unnecessary deep imports
+## 🙏 Acknowledgments
 
-#### 🧳 Redundant Package & Build Cleanup
-- Removes stale `node_modules` packages
-- Cleans up `dist/`, `build/`, or other output folders
-- Suggests files to add to `.gitignore`
-
-#### 🧠 Code Structure & Performance Auditor
-- Detects circular dependencies
-- Highlights modules that should be split
-- Scans for lazy loading opportunities in routes/components
-
-#### 📊 Project Complexity & Maintenance Report
-- Generates a structured report of issues
-- Highlights optimization/refactor candidates
-- Outputs a prioritized cleanup to-do list
-
----
-
-### ✅ Coming Soon
-- Git hooks integration (`pre-commit` cleanup)
-- VSCode extension
-- "Regret Mode™" — undo accidental cleanups
-- AI-guided code suggestions (post-cleanup)
+- The TypeScript team for the TS Compiler API
+- ts-morph for making AST manipulation easier
 

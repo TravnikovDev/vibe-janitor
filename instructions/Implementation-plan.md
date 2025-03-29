@@ -13,8 +13,8 @@
 - [x] Set up basic CLI with Commander.js
 - [x] Establish file/folder structure (`/cli`, `/core`, `/utils`, `/tests`)
 - [x] Configure Jest for testing
-- [ ] Set up CI (GitHub Actions or similar)
-- [ ] Publish MVP README with project purpose and install instructions
+- [x] Set up CI (GitHub Actions or similar)
+- [x] Publish MVP README with project purpose and install instructions
 
 **Deliverables:** Repo scaffold, working `npx vibe-janitor` entry point
 
@@ -24,17 +24,17 @@
 
 **Objectives:** Implement the first wave of core functionality.
 
-- [ ] **Unused Code Cleaner**
-  - Traverse files with `fast-glob`
-  - Parse with `ts-morph`
-  - Remove unused variables, imports, and functions (optionally)
+- [x] **Unused Code Cleaner**
+  - [x] Traverse files with `fast-glob`
+  - [x] Parse with `ts-morph`
+  - [x] Remove unused variables, imports, and functions (optionally)
 
-- [ ] **Asset Sweeper**
-  - Identify unused static files (images, fonts, CSS)
-  - Compare references vs presence in project folders
+- [x] **Asset Sweeper**
+  - [x] Identify unused static files (images, fonts, CSS)
+  - [x] Compare references vs presence in project folders
 
-- [ ] **Output Summary Reporter**
-  - Console-based and file-based reporting (e.g., JSON or Markdown)
+- [x] **Output Summary Reporter**
+  - [x] Console-based and file-based reporting (e.g., JSON or Markdown)
   
 **Deliverables:** Working cleanup modules with dry-run capability
 
@@ -44,16 +44,16 @@
 
 **Objectives:** Add support for structural and dependency cleanup.
 
-- [ ] **Dependency Auditor**
-  - Use `depcheck` to detect unused packages
-  - Generate suggestions (e.g., replace `lodash` with native functions)
+- [x] **Dependency Auditor**
+  - [x] Use `depcheck` to detect unused packages
+  - [x] Generate suggestions (e.g., replace `lodash` with native functions)
 
-- [ ] **Circular Dependency Scanner**
-  - Use `madge` to detect and report circular imports
+- [x] **Circular Dependency Scanner**
+  - [x] Use `madge` to detect and report circular imports
 
-- [ ] **Complexity Analyzer**
-  - Flag large files and functions
-  - Sort and rank based on size and complexity
+- [x] **Complexity Analyzer**
+  - [x] Flag large files and functions
+  - [x] Sort and rank based on size and complexity
 
 **Deliverables:** Diagnostic modules with helpful refactor hints
 
@@ -63,9 +63,9 @@
 
 **Objectives:** Improve CLI interface, command options, and flexibility.
 
-- [ ] Add flags: `--deep-scrub`, `--remove-unused`, `--dry-run`, `--log`
-- [ ] Unified logging system with Chalk styling
-- [ ] Improve error handling and fallback behavior
+- [x] Add flags: `--deep-scrub`, `--remove-unused`, `--dry-run`, `--log`
+- [x] Unified logging system with Chalk styling
+- [x] Improve error handling and fallback behavior
 - [ ] Refactor to ensure testability across all modules
 
 **Deliverables:** Production-level CLI experience with customization support
@@ -76,7 +76,7 @@
 
 **Objectives:** Make the tool extensible and insightful for larger projects.
 
-- [ ] Create human-readable and machine-readable reports (Markdown + JSON)
+- [x] Create human-readable and machine-readable reports (Markdown + JSON)
 - [ ] Introduce plugin system scaffold for future extension
 - [ ] Add support for custom config file (`vibe-janitor.config.ts`)
 
@@ -104,8 +104,4 @@
 - 🧪 90%+ test coverage on all modules
 - 🧼 5+ projects confirmed cleaned via CLI in community feedback
 - ⏱️ Average CLI run time under 10 seconds on medium-sized repos
-
----
-
-Let me know if you'd like a visual roadmap, team role assignments, or burndown chart generation next.
 
