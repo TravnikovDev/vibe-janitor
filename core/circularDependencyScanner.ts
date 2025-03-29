@@ -32,14 +32,14 @@ export class CircularDependencyScanner {
   constructor(targetDir: string, options: CircularDependencyScannerOptions = {}) {
     this.targetDir = targetDir;
     this.options = {
-      verbose: options.verbose || false,
-      excludeRegExp: options.excludeRegExp || [
+      verbose: options.verbose ?? false,
+      excludeRegExp: options.excludeRegExp ?? [
         'node_modules',
         'dist',
         'build',
         'coverage'
       ],
-      fileExtensions: options.fileExtensions || [
+      fileExtensions: options.fileExtensions ?? [
         'js',
         'jsx',
         'ts',

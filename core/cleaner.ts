@@ -99,13 +99,11 @@ export class Cleaner {
         
         for (const namedImport of namedImports) {
           const importName = namedImport.getName();
-          // Instead of using findReferencesAsNodes, just check if the import is used in the file
-          const identifier = namedImport.getNameNode();
           
           // Count references by using identifier text search
           const text = sourceFile.getText();
           const importNameRegex = new RegExp(`\\b${importName}\\b`, 'g');
-          const occurrences = (text.match(importNameRegex) || []).length;
+          const occurrences = (text.match(importNameRegex) ?? []).length;
           
           // If there's only one occurrence (the import itself), it's unused
           if (occurrences <= 1) {
@@ -121,7 +119,7 @@ export class Cleaner {
           // Count references by using identifier text search
           const text = sourceFile.getText();
           const importNameRegex = new RegExp(`\\b${importName}\\b`, 'g');
-          const occurrences = (text.match(importNameRegex) || []).length;
+          const occurrences = (text.match(importNameRegex) ?? []).length;
           
           // If there's only one occurrence (the import itself), it's unused
           if (occurrences <= 1) {
@@ -175,7 +173,7 @@ export class Cleaner {
         // Count references by using variable name text search
         const text = sourceFile.getText();
         const varNameRegex = new RegExp(`\\b${varName}\\b`, 'g');
-        const occurrences = (text.match(varNameRegex) || []).length;
+        const occurrences = (text.match(varNameRegex) ?? []).length;
         
         // Check if the variable is only declared but never used (allowing for one reference)
         if (occurrences <= 1) {
@@ -205,7 +203,7 @@ export class Cleaner {
    */
   private hasExportModifier(node: Node): boolean {
     if (Node.isVariableStatement(node)) {
-      return node.getModifiers()?.some(mod => mod.getKind() === SyntaxKind.ExportKeyword) || false;
+      return node.getModifiers()?.some(mod => mod.getKind() === SyntaxKind.ExportKeyword) ?? false;
     }
     return false;
   }
@@ -237,7 +235,7 @@ export class Cleaner {
         // Count references by using function name text search
         const text = sourceFile.getText();
         const funcNameRegex = new RegExp(`\\b${funcName}\\b`, 'g');
-        const occurrences = (text.match(funcNameRegex) || []).length;
+        const occurrences = (text.match(funcNameRegex) ?? []).length;
         
         // If the function is only declared but never called (allowing for definition)
         if (occurrences <= 1) {
@@ -271,7 +269,7 @@ export class Cleaner {
           // Count references by using method name text search
           const text = sourceFile.getText();
           const methodNameRegex = new RegExp(`\\b${methodName}\\b`, 'g');
-          const occurrences = (text.match(methodNameRegex) || []).length;
+          const occurrences = (text.match(methodNameRegex) ?? []).length;
           
           // If the method is only declared but never called (allowing for definition)
           if (occurrences <= 1) {
@@ -342,7 +340,7 @@ export class Cleaner {
             }
           }
           // Skip node_modules or other non-relative imports
-        } catch (error) {
+        } catch {
           // Skip errors in resolving imports
         }
       }
@@ -373,7 +371,7 @@ export class Cleaner {
             });
           }
         }
-      } catch (error) {
+      } catch {
         // Ignore package.json parsing errors
       }
     }
@@ -496,7 +494,7 @@ export class Cleaner {
     // Handle class methods
     const classDeclarations = sourceFile.getClasses();
     for (const classDecl of classDeclarations) {
-      const className = classDecl.getName() || '';
+      const className = classDecl.getName() ?? '';
       
       const methods = classDecl.getMethods();
       for (const method of methods) {
@@ -514,7 +512,7 @@ export class Cleaner {
   }
 
   /**
-   * Run the cleaning process on the target directory
+   * Find circular dependencies in the project
    */
   public async clean(): Promise<CleaningResult> {
     const result: CleaningResult = {
@@ -573,8 +571,8 @@ export class Cleaner {
             if (this.options.verbose) {
               Logger.success(`Cleaned file: ${filePath}`);
             }
-          } catch (error) {
-            Logger.error(`Failed to save changes to ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
+          } catch {
+            Logger.error(`Failed to save changes to ${filePath}`);
           }
         }
       }
@@ -588,10 +586,26 @@ export class Cleaner {
             }
             
             await fs.remove(filePath);
-          } catch (error) {
-            Logger.error(`Failed to remove file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
+          } catch {
+            Logger.error(`Failed to remove file ${filePath}`);
           }
         }
+      }
+    }
+    
+    // Report summary
+    const totalImports = result.unusedImports.reduce((acc, item) => acc + item.imports.length, 0);
+    const totalVars = result.unusedVariables.reduce((acc, item) => acc + item.variables.length, 0);
+    const totalFuncs = result.unusedFunctions.reduce((acc, item) => acc + item.functions.length, 0);
+    
+    if (this.options.verbose) {
+      Logger.info(`Found ${totalImports} unused imports across ${result.unusedImports.length} files`);
+      Logger.info(`Found ${totalVars} unused variables across ${result.unusedVariables.length} files`);
+      Logger.info(`Found ${totalFuncs} unused functions across ${result.unusedFunctions.length} files`);
+      Logger.info(`Found ${result.unusedFiles.length} potentially unused files`);
+      
+      if (result.modifiedFiles.length > 0) {
+        Logger.info(`Modified ${result.modifiedFiles.length} files`);
       }
     }
     

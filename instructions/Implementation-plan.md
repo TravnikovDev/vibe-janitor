@@ -5,7 +5,7 @@
 
 ---
 
-### 🔄 Phase 1: Foundation & Setup 
+### 🔄 Phase 1: Foundation & Setup ✅
 
 **Objectives:** Set up project infrastructure, baseline CLI, and module scaffolding.
 
@@ -20,7 +20,7 @@
 
 ---
 
-### 🧼 Phase 2: Core Cleaning Modules 
+### 🧼 Phase 2: Core Cleaning Modules ✅
 
 **Objectives:** Implement the first wave of core functionality.
 
@@ -40,7 +40,7 @@
 
 ---
 
-### 📦 Phase 3: Dependency & Structure Analysis 
+### 📦 Phase 3: Dependency & Structure Analysis ✅
 
 **Objectives:** Add support for structural and dependency cleanup.
 
@@ -59,7 +59,7 @@
 
 ---
 
-### 🔧 Phase 4: CLI UX Polish & Option Flags 
+### 🔧 Phase 4: CLI UX Polish & Option Flags ⏳
 
 **Objectives:** Improve CLI interface, command options, and flexibility.
 
@@ -67,34 +67,42 @@
 - [x] Unified logging system with Chalk styling
 - [x] Improve error handling and fallback behavior
 - [ ] Refactor to ensure testability across all modules
+  - [ ] Add missing test coverage for core modules
+  - [ ] Implement mocking for file system operations
 
-**Deliverables:** Production-level CLI experience with customization support
+**Deliverables:** Production-level CLI experience with comprehensive test coverage
 
 ---
 
-### 📈 Phase 5: Reports & Extensibility
+### 📈 Phase 5: Reports & Extensibility ⏳
 
 **Objectives:** Make the tool extensible and insightful for larger projects.
 
 - [x] Create human-readable and machine-readable reports (Markdown + JSON)
-- [ ] Introduce plugin system scaffold for future extension
-- [ ] Add support for custom config file (`vibe-janitor.config.ts`)
 
-**Deliverables:** Report generation, plugin-ready foundation
+**Deliverables:** Report generation, plugin-ready foundation, custom configuration
 
 ---
 
-### 🚀 Phase 6: Release & Growth 
+### 🚀 Phase 6: Release & Growth 🔄
 
 **Objectives:** Publish, document, and gather early feedback.
 
 - [ ] Push to npm as public CLI tool
+  - [ ] Finalize package.json with all metadata
+  - [ ] Create npm publish workflow
+  - [ ] Write publish documentation
 - [ ] Add GitHub discussions or feedback form
-- [ ] Launch website/docs if needed (Docusaurus or VitePress)
+- [ ] Launch documentation website
+  - [ ] Set up VitePress for documentation
+  - [ ] Write user guide and API documentation
+  - [ ] Add examples and use cases
 - [ ] Announce on Dev.to, Reddit, Twitter/X, Hacker News
 - [ ] Track issues & prioritize future iterations
+  - [ ] Set up issue templates
+  - [ ] Create roadmap for version 1.0
 
-**Deliverables:** Public release with growing user base
+**Deliverables:** Public release with growing user base and documentation
 
 ---
 
@@ -104,4 +112,3 @@
 - 🧪 90%+ test coverage on all modules
 - 🧼 5+ projects confirmed cleaned via CLI in community feedback
 - ⏱️ Average CLI run time under 10 seconds on medium-sized repos
-

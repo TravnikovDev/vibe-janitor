@@ -11,7 +11,7 @@ export interface AssetSweeperOptions {
   verbose?: boolean;
   includeImages?: boolean; // Look for unused images
   includeFonts?: boolean;  // Look for unused fonts
-  includeStyles?: boolean; // Look for unused CSS/SCSS/LESS files
+  includeStyles?: boolean; // Look for unused styles
   deleteUnused?: boolean;  // Whether to delete unused assets
 }
 
@@ -46,12 +46,12 @@ export class AssetSweeper {
   constructor(targetDir: string, options: AssetSweeperOptions = {}) {
     this.targetDir = targetDir;
     this.options = {
-      dryRun: options.dryRun || false,
-      verbose: options.verbose || false,
-      includeImages: options.includeImages !== undefined ? options.includeImages : true,
-      includeFonts: options.includeFonts !== undefined ? options.includeFonts : true,
-      includeStyles: options.includeStyles !== undefined ? options.includeStyles : true,
-      deleteUnused: options.deleteUnused || false,
+      dryRun: options.dryRun ?? false,
+      verbose: options.verbose ?? false,
+      includeImages: options.includeImages ?? true,
+      includeFonts: options.includeFonts ?? true,
+      includeStyles: options.includeStyles ?? true,
+      deleteUnused: options.deleteUnused ?? false,
     };
   }
 
@@ -59,7 +59,7 @@ export class AssetSweeper {
    * Find all source files that might reference assets
    */
   private async findSourceFiles(): Promise<void> {
-    const patterns = [
+    const sourcePatterns = [
       // JavaScript/TypeScript files
       '**/*.{js,jsx,ts,tsx}',
       // Markdown and HTML files
@@ -83,7 +83,7 @@ export class AssetSweeper {
     }
     
     try {
-      this.sourceFiles = await glob(patterns, {
+      this.sourceFiles = await glob(sourcePatterns, {
         cwd: this.targetDir,
         ignore: ignorePatterns,
         absolute: true,
@@ -112,8 +112,6 @@ export class AssetSweeper {
     const stylePatterns = this.options.includeStyles 
       ? ['**/*.{css,scss,sass,less}'] 
       : [];
-    
-    const patterns = [...imagePatterns, ...fontPatterns, ...stylePatterns];
     
     const ignorePatterns = [
       '**/node_modules/**',
@@ -199,7 +197,7 @@ export class AssetSweeper {
             return true;
           }
         }
-      } catch (error) {
+      } catch {
         // Skip files we can't read
         continue;
       }
@@ -232,7 +230,7 @@ export class AssetSweeper {
         try {
           const stats = await fs.stat(imagePath);
           result.totalSize += stats.size;
-        } catch (error) {
+        } catch {
           // Skip files we can't stat
         }
       }
@@ -246,7 +244,7 @@ export class AssetSweeper {
         try {
           const stats = await fs.stat(fontPath);
           result.totalSize += stats.size;
-        } catch (error) {
+        } catch {
           // Skip files we can't stat
         }
       }
@@ -260,7 +258,7 @@ export class AssetSweeper {
         try {
           const stats = await fs.stat(stylePath);
           result.totalSize += stats.size;
-        } catch (error) {
+        } catch {
           // Skip files we can't stat
         }
       }

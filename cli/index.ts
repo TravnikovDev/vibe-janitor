@@ -2,11 +2,11 @@
 import { Command } from 'commander';
 import { Logger } from '../utils/logger.js';
 import { Reporter } from '../utils/reporter.js';
-import { Cleaner } from '../core/cleaner.js';
-import { AssetSweeper } from '../core/assetSweeper.js';
-import { Analyzer } from '../core/analyzer.js'; 
-import { DependencyAuditor } from '../core/dependencyAuditor.js';
-import { CircularDependencyScanner } from '../core/circularDependencyScanner.js';
+import { Cleaner, CleaningResult } from '../core/cleaner.js';
+import { AssetSweeper, AssetSweepResult } from '../core/assetSweeper.js';
+import { Analyzer, AnalysisResult } from '../core/analyzer.js'; 
+import { DependencyAuditor, DependencyAuditResult } from '../core/dependencyAuditor.js';
+import { CircularDependencyScanner, CircularDependencyResult } from '../core/circularDependencyScanner.js';
 import path from 'path';
 import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
@@ -24,7 +24,7 @@ const program = new Command();
 /**
  * Initialize and configure the CLI
  */
-function initCLI() {
+function initCLI(): Command {
   program
     .name('vibe-janitor')
     .description('Clean up AI-generated JavaScript/TypeScript projects')
@@ -158,29 +158,36 @@ function initCLI() {
 }
 
 /**
+ * Result of the cleanup modules
+ */
+interface CleanupModulesResult {
+  cleanerResult: CleaningResult;
+  assetResult?: AssetSweepResult;
+  complexityResult?: AnalysisResult;
+  dependencyResult?: DependencyAuditResult;
+  circularResult?: CircularDependencyResult;
+}
+
+/**
  * Run the code and asset cleanup modules
  */
-async function runCleanupModules(targetDir: string, options: any) {
-  const results = {
+async function runCleanupModules(targetDir: string, options: Record<string, unknown>): Promise<CleanupModulesResult> {
+  const results: CleanupModulesResult = {
     cleanerResult: {
-      unusedImports: [] as { file: string; imports: string[] }[],
-      unusedVariables: [] as { file: string; variables: string[] }[],
-      unusedFunctions: [] as { file: string; functions: string[] }[],
-      unusedFiles: [] as string[],
-      modifiedFiles: [] as string[],
-    },
-    assetResult: undefined as any,
-    complexityResult: undefined as any,
-    dependencyResult: undefined as any,
-    circularResult: undefined as any,
+      unusedImports: [],
+      unusedVariables: [],
+      unusedFunctions: [],
+      unusedFiles: [],
+      modifiedFiles: [],
+    }
   };
 
   // Initialize the cleaner
   const cleaner = new Cleaner(targetDir, {
-    dryRun: options.dryRun || false,
-    removeUnused: options.removeUnused || false,
-    deepScrub: options.deepScrub || false,
-    verbose: options.log || false,
+    dryRun: Boolean(options.dryRun ?? false),
+    removeUnused: Boolean(options.removeUnused ?? false),
+    deepScrub: Boolean(options.deepScrub ?? false),
+    verbose: Boolean(options.log ?? false),
   });
   
   // Run code cleanup
@@ -193,9 +200,9 @@ async function runCleanupModules(targetDir: string, options: any) {
   // Run asset sweeper if deep scrub is enabled
   if (options.deepScrub) {
     const assetSweeper = new AssetSweeper(targetDir, {
-      dryRun: options.dryRun || false,
-      deleteUnused: options.removeUnused || false,
-      verbose: options.log || false,
+      dryRun: Boolean(options.dryRun ?? false),
+      deleteUnused: Boolean(options.removeUnused ?? false),
+      verbose: Boolean(options.log ?? false),
     });
     
     if (!options.quiet && options.log) {
@@ -208,7 +215,7 @@ async function runCleanupModules(targetDir: string, options: any) {
   // Run complexity analysis if requested
   if (options.analyzeComplexity) {
     const analyzer = new Analyzer(targetDir, {
-      verbose: options.log || false,
+      verbose: Boolean(options.log ?? false),
     });
     
     if (!options.quiet && options.log) {
@@ -227,7 +234,7 @@ async function runCleanupModules(targetDir: string, options: any) {
   // Run dependency analysis if requested
   if (options.analyzeDependencies || options.deepScrub) {
     const dependencyAuditor = new DependencyAuditor(targetDir, {
-      verbose: options.log || false,
+      verbose: Boolean(options.log ?? false),
     });
     
     if (!options.quiet && options.log) {
@@ -240,7 +247,7 @@ async function runCleanupModules(targetDir: string, options: any) {
   // Scan for circular dependencies if requested
   if (options.checkCircular || options.deepScrub) {
     const circularScanner = new CircularDependencyScanner(targetDir, {
-      verbose: options.log || false,
+      verbose: Boolean(options.log ?? false),
     });
     
     if (!options.quiet && options.log) {

@@ -49,9 +49,9 @@ export class DependencyAuditor {
   constructor(targetDir: string, options: DependencyAuditorOptions = {}) {
     this.targetDir = targetDir;
     this.options = {
-      verbose: options.verbose || false,
-      ignoreDirs: options.ignoreDirs || ['node_modules', 'dist', 'build', 'coverage'],
-      ignoreMatches: options.ignoreMatches || [],
+      verbose: options.verbose ?? false,
+      ignoreDirs: options.ignoreDirs ?? ['node_modules', 'dist', 'build', 'coverage'],
+      ignoreMatches: options.ignoreMatches ?? [],
     };
   }
 
@@ -72,8 +72,8 @@ export class DependencyAuditor {
       
       // Read package.json to get total dependencies count
       const packageJson = await fs.readJson(packageJsonPath);
-      const dependencies = packageJson.dependencies || {};
-      const devDependencies = packageJson.devDependencies || {};
+      const dependencies = packageJson.dependencies ?? {};
+      const devDependencies = packageJson.devDependencies ?? {};
       
       const totalDependencies = Object.keys(dependencies).length;
       const totalDevDependencies = Object.keys(devDependencies).length;

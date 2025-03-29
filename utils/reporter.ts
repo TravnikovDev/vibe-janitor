@@ -23,10 +23,10 @@ export class Reporter {
 
   constructor(options: ReporterOptions = {}) {
     this.options = {
-      outputPath: options.outputPath || 'vibe-janitor-report',
-      generateJson: options.generateJson !== undefined ? options.generateJson : true,
-      generateMarkdown: options.generateMarkdown !== undefined ? options.generateMarkdown : true,
-      verbose: options.verbose || false,
+      outputPath: options.outputPath ?? 'vibe-janitor-report',
+      generateJson: options.generateJson ?? true,
+      generateMarkdown: options.generateMarkdown ?? true,
+      verbose: options.verbose ?? false,
     };
     
     // Ensure we always use the vibe-janitor-report directory regardless of the output path
@@ -69,10 +69,6 @@ export class Reporter {
     
     // Asset results
     if (assetResult) {
-      const totalAssets = assetResult.unusedImages.length + 
-                         assetResult.unusedFonts.length + 
-                         assetResult.unusedStyles.length;
-      
       Logger.log(`\n🖼️  Asset Analysis:`);
       Logger.log(`  - Unused images: ${assetResult.unusedImages.length}`);
       Logger.log(`  - Unused fonts: ${assetResult.unusedFonts.length}`);
@@ -134,7 +130,7 @@ export class Reporter {
     };
     
     // Create filename with proper prefix in the report directory
-    const outputPath = this.options.outputPath || 'vibe-janitor-report';
+    const outputPath = this.options.outputPath ?? 'vibe-janitor-report';
     const filename = `${path.basename(outputPath)}-main.json`;
     const reportPath = path.join(this.reportDir, filename);
     
@@ -305,7 +301,7 @@ export class Reporter {
     }
     
     // Create filename with proper prefix in the report directory
-    const outputPath = this.options.outputPath || 'vibe-janitor-report';
+    const outputPath = this.options.outputPath ?? 'vibe-janitor-report';
     const filename = `${path.basename(outputPath)}-main.md`;
     const reportPath = path.join(this.reportDir, filename);
     

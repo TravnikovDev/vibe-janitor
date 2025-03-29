@@ -46,10 +46,10 @@ export class Analyzer {
   constructor(targetDir: string, options: AnalyzerOptions = {}) {
     this.targetDir = targetDir;
     this.options = {
-      maxLineCount: options.maxLineCount || 500,
-      maxFunctionLength: options.maxFunctionLength || 50,
-      maxNestingDepth: options.maxNestingDepth || 4,
-      verbose: options.verbose || false,
+      maxLineCount: options.maxLineCount ?? 500,
+      maxFunctionLength: options.maxFunctionLength ?? 50,
+      maxNestingDepth: options.maxNestingDepth ?? 4,
+      verbose: options.verbose ?? false,
     };
     
     this.project = new Project({
@@ -117,7 +117,7 @@ export class Analyzer {
       .map(func => {
         const funcText = func.getText();
         const funcLines = funcText.split('\n').length;
-        const name = func.getName() || 'anonymous';
+        const name = func.getName() ?? 'anonymous';
         return { name, lineCount: funcLines };
       })
       .filter(func => func.lineCount > this.options.maxFunctionLength!);
@@ -135,8 +135,8 @@ export class Analyzer {
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        const openBraces = (line.match(/{/g) || []).length;
-        const closeBraces = (line.match(/}/g) || []).length;
+        const openBraces = (line.match(/{/g) ?? []).length;
+        const closeBraces = (line.match(/}/g) ?? []).length;
         
         currentDepth += openBraces - closeBraces;
         
@@ -157,7 +157,6 @@ export class Analyzer {
     // Calculate nesting depth for each function
     allFunctions.forEach(func => {
       const funcText = func.getText();
-      const funcName = func.getName() || 'anonymous';
       calculateNestingDepth(funcText);
     });
     
