@@ -41,18 +41,20 @@ export default testFunction;
     // Mock our own implementation to avoid ts-morph issues
     const analyzer = {
       analyze: async () => ({
-        largeFiles: [{
-          filePath: `${mockProjectDir}/large-file.ts`,
-          lineCount: 525,
-          functionCount: 1,
-          longFunctions: [],
-          deepNesting: [],
-          complexity: 5
-        }],
+        largeFiles: [
+          {
+            filePath: `${mockProjectDir}/large-file.ts`,
+            lineCount: 525,
+            functionCount: 1,
+            longFunctions: [],
+            deepNesting: [],
+            complexity: 5,
+          },
+        ],
         complexFunctions: [],
         deeplyNested: [],
-        circularDependencies: []
-      })
+        circularDependencies: [],
+      }),
     };
 
     // Run the analysis with our mock implementation
@@ -90,16 +92,20 @@ export default testFunction;
     const analyzer = {
       analyze: async () => ({
         largeFiles: [],
-        complexFunctions: [{
-          filePath: `${mockProjectDir}/complex-functions.ts`,
-          functions: [{ 
-            name: 'veryLongFunction', 
-            lineCount: 62 
-          }]
-        }],
+        complexFunctions: [
+          {
+            filePath: `${mockProjectDir}/complex-functions.ts`,
+            functions: [
+              {
+                name: 'veryLongFunction',
+                lineCount: 62,
+              },
+            ],
+          },
+        ],
         deeplyNested: [],
-        circularDependencies: []
-      })
+        circularDependencies: [],
+      }),
     };
 
     // Run the analysis
@@ -130,21 +136,25 @@ export default testFunction;
     // Setup mock file system
     fsMock.setup(mockFiles);
 
-    // Create a mock analyzer with predefined results that would be expected 
+    // Create a mock analyzer with predefined results that would be expected
     // when using a lower threshold
     const analyzer = {
       analyze: async () => ({
         largeFiles: [],
-        complexFunctions: [{
-          filePath: `${mockProjectDir}/moderate-functions.ts`,
-          functions: [{ 
-            name: 'moderateFunction', 
-            lineCount: 32  // Just above our custom threshold
-          }]
-        }],
+        complexFunctions: [
+          {
+            filePath: `${mockProjectDir}/moderate-functions.ts`,
+            functions: [
+              {
+                name: 'moderateFunction',
+                lineCount: 32, // Just above our custom threshold
+              },
+            ],
+          },
+        ],
         deeplyNested: [],
-        circularDependencies: []
-      })
+        circularDependencies: [],
+      }),
     };
 
     // Run the analysis

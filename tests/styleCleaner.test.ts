@@ -19,7 +19,7 @@ describe('StyleCleaner Module', () => {
     await fs.ensureDir(path.join(testDir, 'src'));
     await fs.ensureDir(path.join(testDir, 'src/styles'));
     await fs.ensureDir(path.join(testDir, 'src/components'));
-    
+
     // Initialize FS mock
     fsMock = new FsMock();
   });
@@ -122,7 +122,7 @@ describe('StyleCleaner Module', () => {
         padding: 0;
       }
     `;
-    
+
     await fs.writeFile(cssFilePath, cssContent);
 
     // Create a JS file that references only some of the CSS classes
@@ -233,7 +233,7 @@ describe('StyleCleaner Module', () => {
 
     // Verify CSS module is being analyzed
     expect(resultWithScan.analyzedFiles).toBeGreaterThan(0);
-    
+
     // With real implementation, all css module classes should be detected
     expect(resultWithScan.totalSelectorsFound).toBeGreaterThan(0);
   });
@@ -292,7 +292,7 @@ describe('StyleCleaner Module', () => {
 
     // Make sure the static class is recognized
     expect(result.totalSelectorsFound).toBeGreaterThan(0);
-    
+
     // The real implementation should detect template literals as dynamic class usage
     // Since our test uses className={btnClass} with a template literal
     // Check if we detect the static-class as used (it's directly referenced)
@@ -303,7 +303,7 @@ describe('StyleCleaner Module', () => {
         break;
       }
     }
-    
+
     // Static class should not be marked as unused since it's directly used
     expect(foundStaticClass).toBe(false);
   });
@@ -312,13 +312,10 @@ describe('StyleCleaner Module', () => {
     // Create a directory instead of a file to cause read error
     const errorDir = path.join(testDir, 'src/styles/error-dir.css');
     await fs.ensureDir(errorDir);
-    
+
     // Create a real CSS file as well
     const cssFilePath = path.join(testDir, 'src/styles/main.css');
-    await fs.writeFile(
-      cssFilePath,
-      `.valid-class { color: blue; }`
-    );
+    await fs.writeFile(cssFilePath, `.valid-class { color: blue; }`);
 
     // Run the style cleaner
     const styleCleaner = new StyleCleaner(testDir, {
@@ -328,7 +325,7 @@ describe('StyleCleaner Module', () => {
 
     // Should complete without throwing exceptions
     const result = await styleCleaner.clean();
-    
+
     // Should have analyzed some files
     expect(result.analyzedFiles).toBeGreaterThan(0);
   });

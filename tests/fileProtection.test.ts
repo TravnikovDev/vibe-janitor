@@ -15,7 +15,7 @@ describe('File Protection Feature', () => {
     // Create a temporary directory for test files
     testDir = path.join(os.tmpdir(), `vibe-janitor-test-${Date.now()}`);
     await fs.ensureDir(testDir);
-    
+
     // Initialize cleaner
     cleaner = new Cleaner(testDir);
   });
@@ -38,7 +38,7 @@ describe('File Protection Feature', () => {
       const testJsxFile = path.join(testDir, 'component.test.jsx');
       const testTsxFile = path.join(testDir, 'component.test.tsx');
       const regularFile = path.join(testDir, 'main.ts');
-      
+
       expect(isFileProtected(testFile)).toBe(true);
       expect(isFileProtected(specFile)).toBe(true);
       expect(isFileProtected(testJsxFile)).toBe(true);
@@ -53,7 +53,7 @@ describe('File Protection Feature', () => {
       const fileInFixturesDir = path.join(testDir, 'fixtures', 'data.json');
       const fileInJestDir = path.join(testDir, '__tests__', 'component.test.js');
       const regularFile = path.join(testDir, 'src', 'component.ts');
-      
+
       expect(isFileProtected(fileInTestDir)).toBe(true);
       expect(isFileProtected(fileInTestsDir)).toBe(true);
       expect(isFileProtected(fileInMocksDir)).toBe(true);
@@ -61,12 +61,12 @@ describe('File Protection Feature', () => {
       expect(isFileProtected(fileInJestDir)).toBe(true);
       expect(isFileProtected(regularFile)).toBe(false);
     });
-    
+
     test('should protect test setup and config files', () => {
       const jestConfigFile = path.join(testDir, 'jest.config.js');
       const jestSetupFile = path.join(testDir, 'jest.setup.js');
       const testUtilsFile = path.join(testDir, 'test-utils.js');
-      
+
       expect(isFileProtected(jestConfigFile)).toBe(true);
       expect(isFileProtected(jestSetupFile)).toBe(true);
       expect(isFileProtected(testUtilsFile)).toBe(true);
@@ -81,7 +81,7 @@ describe('File Protection Feature', () => {
       const prettierFile = path.join(testDir, '.prettierrc');
       const babelRcFile = path.join(testDir, '.babelrc');
       const regularFile = path.join(testDir, 'index.ts');
-      
+
       expect(isFileProtected(packageJsonFile)).toBe(true);
       expect(isFileProtected(tsConfigFile)).toBe(true);
       expect(isFileProtected(eslintFile)).toBe(true);
@@ -89,7 +89,7 @@ describe('File Protection Feature', () => {
       expect(isFileProtected(babelRcFile)).toBe(true);
       expect(isFileProtected(regularFile)).toBe(false);
     });
-    
+
     test('should protect various config file formats', () => {
       const eslintJsonFile = path.join(testDir, '.eslintrc.json');
       const prettierJsonFile = path.join(testDir, '.prettierrc.json');
@@ -97,7 +97,7 @@ describe('File Protection Feature', () => {
       const nvmrcFile = path.join(testDir, '.nvmrc');
       const envFile = path.join(testDir, '.env');
       const envLocalFile = path.join(testDir, '.env.local');
-      
+
       expect(isFileProtected(eslintJsonFile)).toBe(true);
       expect(isFileProtected(prettierJsonFile)).toBe(true);
       expect(isFileProtected(npmrcFile)).toBe(true);
@@ -114,19 +114,19 @@ describe('File Protection Feature', () => {
       const licenseFile = path.join(testDir, 'LICENSE');
       const changelogFile = path.join(testDir, 'CHANGELOG.md');
       const regularFile = path.join(testDir, 'index.ts');
-      
+
       expect(isFileProtected(readmeFile)).toBe(true);
       expect(isFileProtected(mdxFile)).toBe(true);
       expect(isFileProtected(licenseFile)).toBe(true);
       expect(isFileProtected(changelogFile)).toBe(true);
       expect(isFileProtected(regularFile)).toBe(false);
     });
-    
+
     test('should protect docs with various capitalizations', () => {
       const upperReadme = path.join(testDir, 'README.md');
       const lowerReadme = path.join(testDir, 'readme.md');
       const mixedReadme = path.join(testDir, 'ReadMe.md');
-      
+
       expect(isFileProtected(upperReadme)).toBe(true);
       expect(isFileProtected(lowerReadme)).toBe(true);
       expect(isFileProtected(mixedReadme)).toBe(true);
@@ -143,7 +143,7 @@ describe('File Protection Feature', () => {
       const examplesFile = path.join(testDir, 'examples', 'demo.js');
       const scriptsFile = path.join(testDir, 'scripts', 'build.js');
       const regularFile = path.join(testDir, 'src', 'index.ts');
-      
+
       expect(isFileProtected(nodeModulesFile)).toBe(true);
       expect(isFileProtected(distFile)).toBe(true);
       expect(isFileProtected(buildFile)).toBe(true);
@@ -153,11 +153,11 @@ describe('File Protection Feature', () => {
       expect(isFileProtected(scriptsFile)).toBe(true);
       expect(isFileProtected(regularFile)).toBe(false);
     });
-    
+
     test('should protect files in deep special directories', () => {
       const nestedDocsFile = path.join(testDir, 'src', 'docs', 'api.md');
       const nestedExamplesFile = path.join(testDir, 'packages', 'examples', 'demo.js');
-      
+
       expect(isFileProtected(nestedDocsFile)).toBe(true);
       expect(isFileProtected(nestedExamplesFile)).toBe(true);
     });
@@ -168,25 +168,25 @@ describe('File Protection Feature', () => {
       const declarationFile = path.join(testDir, 'types.d.ts');
       const nestedDeclFile = path.join(testDir, 'types', 'index.d.ts');
       const regularTsFile = path.join(testDir, 'main.ts');
-      
+
       expect(isFileProtected(declarationFile)).toBe(true);
       expect(isFileProtected(nestedDeclFile)).toBe(true);
       expect(isFileProtected(regularTsFile)).toBe(false);
     });
   });
-  
+
   describe('Edge Cases', () => {
     test('should handle paths with unusual characters', () => {
       const pathWithSpaces = path.join(testDir, 'test files', 'component.test.js');
       const pathWithUnicode = path.join(testDir, 'test-üñîçøðé', 'component.js');
-      
+
       expect(isFileProtected(pathWithSpaces)).toBe(true);
       expect(isFileProtected(pathWithUnicode)).toBe(true);
     });
-    
+
     test('should handle absolute paths', () => {
       const absolutePath = path.join(testDir, 'tests', 'component.test.js');
-      
+
       expect(isFileProtected(absolutePath)).toBe(true);
       // Relative paths aren't directly testable as they need the project context
     });

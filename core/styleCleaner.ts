@@ -55,13 +55,13 @@ export class StyleCleaner {
   private sourceFiles: string[] = [];
   private styleFiles: string[] = [];
   private classUsagePatterns = [
-    /className=["|'](.*?)["|']/g,         // React className
-    /class=["|'](.*?)["|']/g,             // HTML class
+    /className=["|'](.*?)["|']/g, // React className
+    /class=["|'](.*?)["|']/g, // HTML class
     /classList\.add\(["|'](.*?)["|']\)/g, // DOM classList.add
-    /\.([\w-]+)/g,                        // CSS class reference in JS files
-    /\bclass: ['|"](.*?)['|"]/g,          // Vue class binding
+    /\.([\w-]+)/g, // CSS class reference in JS files
+    /\bclass: ['|"](.*?)['|"]/g, // Vue class binding
   ];
-  
+
   constructor(targetDir: string, options: StyleCleanerOptions = {}) {
     this.targetDir = targetDir;
     this.options = {
@@ -120,7 +120,9 @@ export class StyleCleaner {
       });
 
       if (this.options.verbose) {
-        Logger.info(`Found ${this.sourceFiles.length} source files and ${this.styleFiles.length} style files`);
+        Logger.info(
+          `Found ${this.sourceFiles.length} source files and ${this.styleFiles.length} style files`
+        );
       }
     } catch (error) {
       Logger.error(
@@ -177,10 +179,14 @@ export class StyleCleaner {
 
           styleDefinitions.push(definition);
         } catch (parseError) {
-          Logger.warn(`Error parsing CSS file ${file}: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+          Logger.warn(
+            `Error parsing CSS file ${file}: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+          );
         }
       } catch (error) {
-        Logger.error(`Error reading CSS file ${file}: ${error instanceof Error ? error.message : String(error)}`);
+        Logger.error(
+          `Error reading CSS file ${file}: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     }
 
@@ -193,7 +199,7 @@ export class StyleCleaner {
   private async findClassUsages(styleDefinitions: StyleDefinition[]): Promise<void> {
     // Create a flattened map of all selectors for quick lookup
     const classMap = new Map<string, CssSelector>();
-    
+
     // First, populate the map with all the classes we've found
     for (const definition of styleDefinitions) {
       for (const selector of definition.selectors) {
@@ -210,16 +216,16 @@ export class StyleCleaner {
     for (const file of this.sourceFiles) {
       try {
         const content = await fs.readFile(file, 'utf8');
-        
+
         // Scan for different class usage patterns
         for (const pattern of this.classUsagePatterns) {
           const matches = content.matchAll(pattern);
-          
+
           for (const match of matches) {
             if (match[1]) {
               // Handle space-separated class lists
               const classes = match[1].split(/\s+/);
-              
+
               for (const className of classes) {
                 if (classMap.get(className?.trim())) {
                   const selector = classMap.get(className.trim());
@@ -250,7 +256,9 @@ export class StyleCleaner {
           }
         }
       } catch (error) {
-        Logger.info(`Error reading source file ${file}: ${error instanceof Error ? error.message : String(error)}`);
+        Logger.info(
+          `Error reading source file ${file}: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     }
   }
@@ -258,13 +266,15 @@ export class StyleCleaner {
   /**
    * Find unused CSS selectors
    */
-  private findUnusedSelectors(styleDefinitions: StyleDefinition[]): { file: string; selectors: string[] }[] {
+  private findUnusedSelectors(
+    styleDefinitions: StyleDefinition[]
+  ): { file: string; selectors: string[] }[] {
     const result: { file: string; selectors: string[] }[] = [];
 
     for (const definition of styleDefinitions) {
       const unusedSelectors = definition.selectors
-        .filter(selector => !selector.used)
-        .map(selector => selector.selector);
+        .filter((selector) => !selector.used)
+        .map((selector) => selector.selector);
 
       if (unusedSelectors.length > 0) {
         result.push({
@@ -282,7 +292,7 @@ export class StyleCleaner {
    */
   private async removeUnusedSelectors(
     unusedSelectors: { file: string; selectors: string[] }[]
-  ): Promise<{ modifiedFiles: string[], bytesRemoved: number }> {
+  ): Promise<{ modifiedFiles: string[]; bytesRemoved: number }> {
     const modifiedFiles: string[] = [];
     let bytesRemoved = 0;
 
@@ -295,62 +305,62 @@ export class StyleCleaner {
         const { file, selectors } = entry;
         const content = await fs.readFile(file, 'utf8');
         const originalSize = content.length;
-        
+
         // Parse the CSS content
         const ast = cssTree.parse(content);
-        
+
         // Go through the AST and remove rules with any of the unused selectors
         cssTree.walk(ast, {
           visit: 'Rule',
-          enter: function(node, item, list) {
+          enter: function (node, item, list) {
             if (node.prelude && node.prelude.type === 'SelectorList') {
               // Check if any selectors need to be removed
               const toRemove = new Set<number>();
-              
+
               let i = 0;
               cssTree.walk(node.prelude, {
                 visit: 'Selector',
-                enter: function(selector) {
+                enter: function (selector) {
                   // Check if this selector contains any of our unused class selectors
                   let containsUnusedClass = false;
-                  
+
                   cssTree.walk(selector, {
                     visit: 'ClassSelector',
-                    enter: function(classNode) {
+                    enter: function (classNode) {
                       const fullSelector = `.${classNode.name}`;
                       if (selectors.includes(fullSelector)) {
                         containsUnusedClass = true;
                       }
-                    }
+                    },
                   });
-                  
+
                   if (containsUnusedClass) {
                     toRemove.add(i);
                   }
                   i++;
-                }
+                },
               });
-              
+
               // If all selectors for this rule are unused, remove the rule
               if (toRemove.size === i) {
                 list.remove(item);
               }
             }
-          }
+          },
         });
-        
+
         // Generate the cleaned CSS
         const cleanedContent = cssTree.generate(ast);
-        
+
         // Calculate bytes saved
         const newSize = cleanedContent.length;
-        bytesRemoved += (originalSize - newSize);
-        
+        bytesRemoved += originalSize - newSize;
+
         // Write the file if there were changes
         if (cleanedContent !== content) {
           await fs.writeFile(file, cleanedContent, 'utf8');
           modifiedFiles.push(file);
-          
+
           if (this.options.verbose) {
             Logger.success(`Cleaned ${file} (removed ${originalSize - newSize} bytes)`);
           }
@@ -417,7 +427,9 @@ export class StyleCleaner {
       );
 
       if (this.options.verbose) {
-        Logger.info(`Found ${result.totalSelectorsFound} CSS selectors across ${styleDefinitions.length} files`);
+        Logger.info(
+          `Found ${result.totalSelectorsFound} CSS selectors across ${styleDefinitions.length} files`
+        );
       }
 
       // Find which class selectors are used in source files
@@ -442,7 +454,9 @@ export class StyleCleaner {
         result.bytesRemoved = bytesRemoved;
 
         if (this.options.verbose && modifiedFiles.length > 0) {
-          Logger.success(`Cleaned ${modifiedFiles.length} CSS files (${this.formatSize(bytesRemoved)} removed)`);
+          Logger.success(
+            `Cleaned ${modifiedFiles.length} CSS files (${this.formatSize(bytesRemoved)} removed)`
+          );
         }
       } else if (result.totalUnusedSelectors > 0) {
         if (this.options.verbose) {
@@ -451,7 +465,9 @@ export class StyleCleaner {
         }
       }
     } catch (error) {
-      Logger.error(`Error during style cleaning: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(
+        `Error during style cleaning: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
 
     return result;

@@ -20,7 +20,7 @@ describe('Analyzer Module', () => {
   test('should detect large files', async () => {
     // Create a test file that exceeds the max line count
     const testFilePath = path.join(testDir, 'large-file.ts');
-    
+
     // Add tsconfig.json to make the analyzer work correctly
     const tsConfigPath = path.join(testDir, 'tsconfig.json');
     await fs.writeFile(
@@ -53,20 +53,22 @@ export default testFunction;
     // Use the same technique as in mock test - bypass ts-morph by mocking the result
     const analyzer = {
       analyze: async () => ({
-        largeFiles: [{
-          filePath: path.join(testDir, 'large-file.ts'),
-          lineCount: 525,
-          functionCount: 1,
-          longFunctions: [],
-          deepNesting: [],
-          complexity: 5
-        }],
+        largeFiles: [
+          {
+            filePath: path.join(testDir, 'large-file.ts'),
+            lineCount: 525,
+            functionCount: 1,
+            longFunctions: [],
+            deepNesting: [],
+            complexity: 5,
+          },
+        ],
         complexFunctions: [],
         deeplyNested: [],
-        circularDependencies: []
-      })
+        circularDependencies: [],
+      }),
     };
-    
+
     const result = await analyzer.analyze();
 
     // Check if the large file was detected
@@ -108,18 +110,22 @@ export default testFunction;
     const analyzer = {
       analyze: async () => ({
         largeFiles: [],
-        complexFunctions: [{
-          filePath: path.join(testDir, 'complex-functions.ts'),
-          functions: [{
-            name: 'veryLongFunction',
-            lineCount: 62
-          }]
-        }],
+        complexFunctions: [
+          {
+            filePath: path.join(testDir, 'complex-functions.ts'),
+            functions: [
+              {
+                name: 'veryLongFunction',
+                lineCount: 62,
+              },
+            ],
+          },
+        ],
         deeplyNested: [],
-        circularDependencies: []
-      })
+        circularDependencies: [],
+      }),
     };
-    
+
     const result = await analyzer.analyze();
 
     // Check if the complex function was detected
@@ -169,17 +175,21 @@ export default testFunction;
       analyze: async () => ({
         largeFiles: [],
         complexFunctions: [],
-        deeplyNested: [{
-          filePath: path.join(testDir, 'deeply-nested.ts'),
-          locations: [{
-            location: 'line 100',
-            depth: 5
-          }]
-        }],
-        circularDependencies: []
-      })
+        deeplyNested: [
+          {
+            filePath: path.join(testDir, 'deeply-nested.ts'),
+            locations: [
+              {
+                location: 'line 100',
+                depth: 5,
+              },
+            ],
+          },
+        ],
+        circularDependencies: [],
+      }),
     };
-    
+
     const result = await analyzer.analyze();
 
     // Check if the deeply nested code was detected
@@ -215,18 +225,22 @@ export default testFunction;
     const analyzer = {
       analyze: async () => ({
         largeFiles: [],
-        complexFunctions: [{
-          filePath: path.join(testDir, 'moderate-functions.ts'),
-          functions: [{
-            name: 'moderateFunction',
-            lineCount: 32
-          }]
-        }],
+        complexFunctions: [
+          {
+            filePath: path.join(testDir, 'moderate-functions.ts'),
+            functions: [
+              {
+                name: 'moderateFunction',
+                lineCount: 32,
+              },
+            ],
+          },
+        ],
         deeplyNested: [],
-        circularDependencies: []
-      })
+        circularDependencies: [],
+      }),
     };
-    
+
     const result = await analyzer.analyze();
 
     // Check if the moderate function was detected as complex with the lower threshold

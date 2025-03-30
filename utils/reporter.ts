@@ -78,18 +78,18 @@ export class Reporter {
     Logger.log(
       `  - Unused imports: ${totalImports} across ${cleanerResult.unusedImports.length} files`
     );
-    
+
     // Show detailed imports info if requested
     if (showDetailed && cleanerResult.unusedImports.length > 0) {
       Logger.log('\n    📋 Unused imports details:');
-      cleanerResult.unusedImports.forEach(file => {
+      cleanerResult.unusedImports.forEach((file) => {
         const relativePath = file.file.split('/').slice(-3).join('/'); // Show last 3 path segments for brevity
         Logger.log(`    - ${relativePath} (${file.imports.length} unused):`);
-        file.imports.forEach(importName => {
+        file.imports.forEach((importName) => {
           Logger.log(`      • ${importName}`);
         });
       });
-      
+
       if (!cleanerResult.modifiedFiles.length) {
         Logger.log('\n    💡 To fix these issues, run: npx vibe-janitor --remove-unused');
       }
@@ -98,14 +98,14 @@ export class Reporter {
     Logger.log(
       `  - Unused variables: ${totalVariables} across ${cleanerResult.unusedVariables.length} files`
     );
-    
+
     // Show detailed variables info if requested
     if (showDetailed && cleanerResult.unusedVariables.length > 0) {
       Logger.log('\n    📋 Unused variables details:');
-      cleanerResult.unusedVariables.forEach(file => {
+      cleanerResult.unusedVariables.forEach((file) => {
         const relativePath = file.file.split('/').slice(-3).join('/');
         Logger.log(`    - ${relativePath} (${file.variables.length} unused):`);
-        file.variables.forEach(varName => {
+        file.variables.forEach((varName) => {
           Logger.log(`      • ${varName}`);
         });
       });
@@ -114,41 +114,43 @@ export class Reporter {
     Logger.log(
       `  - Unused functions: ${totalFunctions} across ${cleanerResult.unusedFunctions.length} files`
     );
-    
+
     // Show detailed functions info if requested
     if (showDetailed && cleanerResult.unusedFunctions.length > 0) {
       Logger.log('\n    📋 Unused functions details:');
-      cleanerResult.unusedFunctions.forEach(file => {
+      cleanerResult.unusedFunctions.forEach((file) => {
         const relativePath = file.file.split('/').slice(-3).join('/');
         Logger.log(`    - ${relativePath} (${file.functions.length} unused):`);
-        file.functions.forEach(funcName => {
+        file.functions.forEach((funcName) => {
           Logger.log(`      • ${funcName}`);
         });
       });
     }
 
     Logger.log(`  - Potentially unused files: ${cleanerResult.unusedFiles.length}`);
-    
+
     if (cleanerResult.unusedFilesSize > 0) {
-      Logger.log(`  - Potential space savings from unused files: ${this.formatSize(cleanerResult.unusedFilesSize)}`);
+      Logger.log(
+        `  - Potential space savings from unused files: ${this.formatSize(cleanerResult.unusedFilesSize)}`
+      );
     }
-    
+
     // Show detailed unused files if requested
     if (showDetailed && cleanerResult.unusedFiles.length > 0) {
       Logger.log('\n    📋 Potentially unused files:');
-      cleanerResult.unusedFiles.forEach(file => {
+      cleanerResult.unusedFiles.forEach((file) => {
         const relativePath = file.split('/').slice(-3).join('/');
         Logger.log(`    - ${relativePath}`);
       });
     }
-    
+
     if (cleanerResult.deletedFiles && cleanerResult.deletedFiles.length > 0) {
       Logger.log(`  - Deleted ${cleanerResult.deletedFiles.length} unused files`);
-      
+
       // Show deleted files if requested
       if (showDetailed) {
         Logger.log('\n    📋 Deleted files:');
-        cleanerResult.deletedFiles.forEach(file => {
+        cleanerResult.deletedFiles.forEach((file) => {
           const relativePath = file.split('/').slice(-3).join('/');
           Logger.log(`    - ${relativePath}`);
         });
@@ -169,54 +171,60 @@ export class Reporter {
       if (assetResult.deletedAssets.length > 0) {
         Logger.log(`  - Deleted ${assetResult.deletedAssets.length} assets`);
       }
-      
+
       // Show detailed asset info if requested
-      if (showDetailed && 
-          (assetResult.unusedImages.length > 0 || 
-           assetResult.unusedFonts.length > 0 || 
-           assetResult.unusedStyles.length > 0)) {
-        
+      if (
+        showDetailed &&
+        (assetResult.unusedImages.length > 0 ||
+          assetResult.unusedFonts.length > 0 ||
+          assetResult.unusedStyles.length > 0)
+      ) {
         if (assetResult.unusedImages.length > 0) {
           Logger.log('\n    📋 Unused images:');
-          assetResult.unusedImages.forEach(image => {
+          assetResult.unusedImages.forEach((image) => {
             const relativePath = image.split('/').slice(-3).join('/');
             Logger.log(`    - ${relativePath}`);
           });
         }
-        
+
         if (assetResult.unusedFonts.length > 0) {
           Logger.log('\n    📋 Unused fonts:');
-          assetResult.unusedFonts.forEach(font => {
+          assetResult.unusedFonts.forEach((font) => {
             const relativePath = font.split('/').slice(-3).join('/');
             Logger.log(`    - ${relativePath}`);
           });
         }
-        
+
         if (assetResult.unusedStyles.length > 0) {
           Logger.log('\n    📋 Unused style files:');
-          assetResult.unusedStyles.forEach(style => {
+          assetResult.unusedStyles.forEach((style) => {
             const relativePath = style.split('/').slice(-3).join('/');
             Logger.log(`    - ${relativePath}`);
           });
         }
-        
+
         if (!assetResult.deletedAssets.length) {
-          Logger.log('\n    💡 To remove these unused assets, run: npx vibe-janitor --deep-scrub --remove-unused');
+          Logger.log(
+            '\n    💡 To remove these unused assets, run: npx vibe-janitor --deep-scrub --remove-unused'
+          );
         }
       }
     }
-    
+
     // Show general help if issues were found but not fixed
-    if ((totalImports > 0 || totalVariables > 0 || totalFunctions > 0 || 
-         cleanerResult.unusedFiles.length > 0 || 
-         (assetResult && 
-          (assetResult.unusedImages.length > 0 || 
-           assetResult.unusedFonts.length > 0 || 
-           assetResult.unusedStyles.length > 0))) && 
-        cleanerResult.modifiedFiles.length === 0 && 
-        (!assetResult || assetResult.deletedAssets.length === 0) && 
-        !showDetailed) {
-      
+    if (
+      (totalImports > 0 ||
+        totalVariables > 0 ||
+        totalFunctions > 0 ||
+        cleanerResult.unusedFiles.length > 0 ||
+        (assetResult &&
+          (assetResult.unusedImages.length > 0 ||
+            assetResult.unusedFonts.length > 0 ||
+            assetResult.unusedStyles.length > 0))) &&
+      cleanerResult.modifiedFiles.length === 0 &&
+      (!assetResult || assetResult.deletedAssets.length === 0) &&
+      !showDetailed
+    ) {
       Logger.log('\n💡 For detailed information on these issues, run: npx vibe-janitor --list');
       Logger.log('💡 To automatically fix these issues, run: npx vibe-janitor --remove-unused');
     }
@@ -227,7 +235,7 @@ export class Reporter {
       Logger.log(`  - Analyzed CSS files: ${styleResult.analyzedFiles}`);
       Logger.log(`  - Total CSS selectors found: ${styleResult.totalSelectorsFound}`);
       Logger.log(`  - Unused CSS selectors: ${styleResult.totalUnusedSelectors}`);
-      
+
       if (styleResult.modifiedFiles.length > 0) {
         Logger.log(`  - Cleaned ${styleResult.modifiedFiles.length} CSS files`);
       }
@@ -235,22 +243,24 @@ export class Reporter {
       // Show detailed style info if requested
       if (showDetailed && styleResult.unusedSelectors.length > 0) {
         Logger.log('\n    📋 Unused CSS selectors details:');
-        styleResult.unusedSelectors.forEach(file => {
+        styleResult.unusedSelectors.forEach((file) => {
           const relativePath = file.file.split('/').slice(-3).join('/');
           Logger.log(`    - ${relativePath} (${file.selectors.length} unused):`);
           // Show up to 10 selectors to avoid flooding the console
           const MAX_SELECTORS_TO_SHOW = 10;
-          file.selectors.slice(0, MAX_SELECTORS_TO_SHOW).forEach(selector => {
+          file.selectors.slice(0, MAX_SELECTORS_TO_SHOW).forEach((selector) => {
             Logger.log(`      • ${selector}`);
           });
-          
+
           if (file.selectors.length > MAX_SELECTORS_TO_SHOW) {
             Logger.log(`      • ... and ${file.selectors.length - MAX_SELECTORS_TO_SHOW} more`);
           }
         });
-        
+
         if (styleResult.modifiedFiles.length === 0) {
-          Logger.log('\n    💡 To remove unused CSS selectors, run: npx vibe-janitor --clean-styles --remove-unused');
+          Logger.log(
+            '\n    💡 To remove unused CSS selectors, run: npx vibe-janitor --clean-styles --remove-unused'
+          );
         }
       }
     }
@@ -427,7 +437,7 @@ export class Reporter {
       for (const file of cleanerResult.unusedFiles) {
         markdown += `- ${file}\n`;
       }
-      
+
       if (cleanerResult.unusedFilesSize > 0) {
         markdown += `\n**Potential space savings:** ${this.formatSize(cleanerResult.unusedFilesSize)}\n`;
       }
@@ -514,12 +524,12 @@ export class Reporter {
       markdown += `- Analyzed CSS files: ${styleResult.analyzedFiles}\n`;
       markdown += `- Total CSS selectors found: ${styleResult.totalSelectorsFound}\n`;
       markdown += `- Unused CSS selectors: ${styleResult.totalUnusedSelectors}\n`;
-      
+
       if (styleResult.modifiedFiles.length > 0) {
         markdown += `- Modified CSS files: ${styleResult.modifiedFiles.length}\n`;
         markdown += `- Bytes removed: ${this.formatSize(styleResult.bytesRemoved)}\n`;
       }
-      
+
       markdown += '\n';
 
       // Unused selectors
@@ -528,12 +538,12 @@ export class Reporter {
       if (styleResult.unusedSelectors.length > 0) {
         for (const file of styleResult.unusedSelectors) {
           markdown += `- **${file.file}** (${file.selectors.length} unused selectors)\n`;
-          
+
           // Group selectors into chunks of 10 for readability
           const CHUNK_SIZE = 10;
           for (let i = 0; i < file.selectors.length; i += CHUNK_SIZE) {
             const chunk = file.selectors.slice(i, i + CHUNK_SIZE);
-            const selectorList = chunk.map(s => `\`${s}\``).join(', ');
+            const selectorList = chunk.map((s) => `\`${s}\``).join(', ');
             markdown += `  - ${selectorList}\n`;
           }
         }

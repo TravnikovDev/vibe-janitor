@@ -9,31 +9,31 @@ describe('Logger Module', () => {
     Logger.warn('warning message');
     Logger.error('error message');
     Logger.welcome();
-    
+
     // Pass if no exceptions
     expect(true).toBe(true);
   });
-  
+
   test('should handle progress displays', () => {
     // Simple coverage test - start and immediately stop
     Logger.startProgress();
     Logger.stopProgress();
-    
+
     // Pass if no exceptions
     expect(true).toBe(true);
   });
-  
+
   test('should run task with progress indication', async () => {
     // Simple task that resolves
     const mockTask = async () => 'result';
-    
+
     // Run with minimal phases
     const result = await Logger.runWithProgress(mockTask, 1, ['Testing']);
-    
+
     // Check result returned correctly
     expect(result).toBe('result');
   });
-  
+
   test('should format paths', () => {
     // Verify the method runs without errors
     const result = Logger.formatPath('/some/path');

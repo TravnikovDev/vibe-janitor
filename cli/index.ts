@@ -67,19 +67,19 @@ function initCLI(): Command {
         // and interactive is not disabled
         const hasExplicitOptions = Boolean(
           options.removeUnused ??
-          options.dryRun ??
-          options.deepScrub ??
-          options.list ??
-          options.report ??
-          options.analyzeComplexity ??
-          options.analyzeDependencies ??
-          options.checkCircular ??
-          options.generateGraph
+            options.dryRun ??
+            options.deepScrub ??
+            options.list ??
+            options.report ??
+            options.analyzeComplexity ??
+            options.analyzeDependencies ??
+            options.checkCircular ??
+            options.generateGraph
         );
 
         if (!hasExplicitOptions && options.interactive !== false) {
           options = await promptForOptions(options, targetDir);
-          
+
           // User cancelled the prompts
           if (!options) {
             process.exit(0);
@@ -112,8 +112,8 @@ function initCLI(): Command {
           });
 
           reporter.generateConsoleSummary(
-            results.cleanerResult, 
-            results.assetResult, 
+            results.cleanerResult,
+            results.assetResult,
             Boolean(options.list),
             results.styleResult
           );
@@ -217,71 +217,79 @@ function initCLI(): Command {
 /**
  * Ask the user for cleanup options interactively
  */
-async function promptForOptions(options: Record<string, unknown>, targetDir: string): Promise<Record<string, unknown> | null> {
+async function promptForOptions(
+  options: Record<string, unknown>,
+  targetDir: string
+): Promise<Record<string, unknown> | null> {
   Logger.info('\n🧹 Welcome to vibe-janitor interactive setup!');
   Logger.info(`\nTarget directory: ${targetDir}\n`);
 
   try {
-    const responses = await prompts([
+    const responses = await prompts(
+      [
+        {
+          type: 'confirm',
+          name: 'removeUnused',
+          message: 'Clean up unused imports and code automatically?',
+          initial: true,
+        },
+        {
+          type: 'confirm',
+          name: 'list',
+          message: 'Show detailed information about issues found?',
+          initial: true,
+        },
+        {
+          type: 'confirm',
+          name: 'report',
+          message: 'Generate detailed reports (JSON and Markdown)?',
+          initial: false,
+        },
+        {
+          type: 'confirm',
+          name: 'deepScrub',
+          message: 'Run advanced cleanup (assets, variables, functions)?',
+          initial: false,
+        },
+        {
+          type: 'confirm',
+          name: 'cleanStyles',
+          message: 'Clean unused CSS classes and selectors?',
+          initial: false,
+        },
+        {
+          type: 'confirm',
+          name: 'deleteUnusedFiles',
+          message: `${chalk.red('Delete')} files that are not imported or used anywhere?`,
+          initial: true,
+        },
+        {
+          type: 'confirm',
+          name: 'analyzeDependencies',
+          message: 'Analyze package dependencies?',
+          initial: false,
+        },
+        {
+          type: 'confirm',
+          name: 'checkCircular',
+          message: 'Check for circular dependencies?',
+          initial: false,
+        },
+      ],
       {
-        type: 'confirm',
-        name: 'removeUnused',
-        message: 'Clean up unused imports and code automatically?',
-        initial: true
-      },
-      {
-        type: 'confirm',
-        name: 'list',
-        message: 'Show detailed information about issues found?',
-        initial: true
-      },
-      {
-        type: 'confirm',
-        name: 'report',
-        message: 'Generate detailed reports (JSON and Markdown)?',
-        initial: false
-      },
-      {
-        type: 'confirm',
-        name: 'deepScrub',
-        message: 'Run advanced cleanup (assets, variables, functions)?',
-        initial: false
-      },
-      {
-        type: 'confirm',
-        name: 'cleanStyles',
-        message: 'Clean unused CSS classes and selectors?',
-        initial: false
-      },
-      {
-        type: 'confirm',
-        name: 'deleteUnusedFiles',
-        message: `${chalk.red('Delete')} files that are not imported or used anywhere?`,
-        initial: true
-      },
-      {
-        type: 'confirm',
-        name: 'analyzeDependencies',
-        message: 'Analyze package dependencies?',
-        initial: false
-      },
-      {
-        type: 'confirm',
-        name: 'checkCircular',
-        message: 'Check for circular dependencies?',
-        initial: false
+        onCancel: () => {
+          Logger.info('\n🚫 Operation cancelled by user');
+          return null;
+        },
       }
-    ], {
-      onCancel: () => {
-        Logger.info('\n🚫 Operation cancelled by user');
-        return null;
-      }
-    });
+    );
 
     // Merge the responses with the original options
     return { ...options, ...responses };
   } catch (error) {
-    Logger.error(`Error during interactive prompts: ${error instanceof Error ? error.message : String(error)}`);
+    Logger.error(
+      `Error during interactive prompts: ${error instanceof Error ? error.message : String(error)}`
+    );
     return options; // Return original options if prompts fail
   }
 }
@@ -313,7 +321,7 @@ async function runCleanupModules(
       unusedFiles: [],
       modifiedFiles: [],
       deletedFiles: [],
-      unusedFilesSize: 0
+      unusedFilesSize: 0,
     },
   };
 
@@ -322,7 +330,7 @@ async function runCleanupModules(
     dryRun: Boolean(options.dryRun ?? false),
     removeUnused: Boolean(options.removeUnused ?? false),
     deepScrub: Boolean(options.deepScrub ?? false),
-    deleteUnusedFiles: Boolean(options.deleteUnusedFiles ?? false), 
+    deleteUnusedFiles: Boolean(options.deleteUnusedFiles ?? false),
     verbose: Boolean(options.log ?? false),
   });
 
@@ -364,7 +372,9 @@ async function runCleanupModules(
     results.styleResult = await styleCleaner.clean();
 
     if (!options.quiet && options.log && results.styleResult) {
-      Logger.info(`Found ${results.styleResult.totalUnusedSelectors} unused CSS selectors across ${results.styleResult.unusedSelectors.length} files`);
+      Logger.info(
+        `Found ${results.styleResult.totalUnusedSelectors} unused CSS selectors across ${results.styleResult.unusedSelectors.length} files`
+      );
       if (results.styleResult.modifiedFiles.length > 0) {
         Logger.success(`Cleaned ${results.styleResult.modifiedFiles.length} CSS files`);
       }

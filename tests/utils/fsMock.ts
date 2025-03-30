@@ -5,15 +5,15 @@ import type { PathLike } from 'fs';
  * Creates a mock function that can be called like a Jest mock
  */
 function createMockFn<T extends (...args: any[]) => any>(implementation: T): T {
-  const mockFn = function(...args: any[]) {
+  const mockFn = function (...args: any[]) {
     return implementation(...args);
   };
-  
+
   // Add mockImplementation method to simulate Jest's mock functionality
   (mockFn as any).mockImplementation = (impl: T) => {
     return createMockFn(impl);
   };
-  
+
   return mockFn as any;
 }
 
@@ -67,19 +67,21 @@ export class FsMock {
       }
     });
 
-    const mockWriteFile = createMockFn((path: PathLike, data: any, options: any, callback?: any) => {
-      if (!callback && typeof options === 'function') {
-        callback = options;
-        options = 'utf8';
+    const mockWriteFile = createMockFn(
+      (path: PathLike, data: any, options: any, callback?: any) => {
+        if (!callback && typeof options === 'function') {
+          callback = options;
+          options = 'utf8';
+        }
+
+        const normalizedPath = this.normalizePath(path);
+        const content = typeof data === 'string' ? data : data.toString();
+
+        this.mockFiles.set(normalizedPath, content);
+
+        return callback ? callback(null) : Promise.resolve();
       }
-
-      const normalizedPath = this.normalizePath(path);
-      const content = typeof data === 'string' ? data : data.toString();
-
-      this.mockFiles.set(normalizedPath, content);
-
-      return callback ? callback(null) : Promise.resolve();
-    });
+    );
 
     const mockExistsSync = createMockFn((path: PathLike) => {
       const normalizedPath = this.normalizePath(path);
