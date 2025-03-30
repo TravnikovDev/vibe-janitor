@@ -33,11 +33,11 @@ describe('File Protection Feature', () => {
 
   describe('Test Files Protection', () => {
     test('should protect files with .test. and .spec. in their names', () => {
-      const testFile = path.join(testDir, 'component.test.ts');
-      const specFile = path.join(testDir, 'helper.spec.js');
-      const testJsxFile = path.join(testDir, 'component.test.jsx');
-      const testTsxFile = path.join(testDir, 'component.test.tsx');
-      const regularFile = path.join(testDir, 'main.ts');
+      const testFile = path.join(testDir, 'src/component.test.ts');
+      const specFile = path.join(testDir, 'src/helper.spec.js');
+      const testJsxFile = path.join(testDir, 'src/component.test.jsx');
+      const testTsxFile = path.join(testDir, 'src/component.test.tsx');
+      const regularFile = path.join(testDir, 'src/main.ts');
 
       expect(isFileProtected(testFile)).toBe(true);
       expect(isFileProtected(specFile)).toBe(true);
@@ -80,7 +80,7 @@ describe('File Protection Feature', () => {
       const eslintFile = path.join(testDir, '.eslintrc.js');
       const prettierFile = path.join(testDir, '.prettierrc');
       const babelRcFile = path.join(testDir, '.babelrc');
-      const regularFile = path.join(testDir, 'index.ts');
+      const regularFile = path.join(testDir, 'src/index.ts');
 
       expect(isFileProtected(packageJsonFile)).toBe(true);
       expect(isFileProtected(tsConfigFile)).toBe(true);
@@ -113,7 +113,7 @@ describe('File Protection Feature', () => {
       const mdxFile = path.join(testDir, 'guide.mdx');
       const licenseFile = path.join(testDir, 'LICENSE');
       const changelogFile = path.join(testDir, 'CHANGELOG.md');
-      const regularFile = path.join(testDir, 'index.ts');
+      const regularFile = path.join(testDir, 'src/index.ts');
 
       expect(isFileProtected(readmeFile)).toBe(true);
       expect(isFileProtected(mdxFile)).toBe(true);
@@ -167,7 +167,7 @@ describe('File Protection Feature', () => {
     test('should protect TypeScript declaration files', () => {
       const declarationFile = path.join(testDir, 'types.d.ts');
       const nestedDeclFile = path.join(testDir, 'types', 'index.d.ts');
-      const regularTsFile = path.join(testDir, 'main.ts');
+      const regularTsFile = path.join(testDir, 'src/main.ts');
 
       expect(isFileProtected(declarationFile)).toBe(true);
       expect(isFileProtected(nestedDeclFile)).toBe(true);

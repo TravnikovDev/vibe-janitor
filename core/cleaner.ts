@@ -567,8 +567,8 @@ export class Cleaner {
 
     // Skip test files - more comprehensive check
     if (
-      fileName.includes('.test.') ||
-      fileName.includes('.spec.') ||
+      fileName.includes('test.') ||
+      fileName.includes('spec.') ||
       fileName.includes('jest.') ||
       fileName.includes('test-') ||
       dirName.includes('/test') ||
@@ -630,11 +630,7 @@ export class Cleaner {
     // Protect framework-specific directories and files
     const frameworkPatterns = [
       '/pages/', '/src/pages/', // Next.js pages
-      '/components/', '/src/components/', // Common component folders
-      '/layouts/', '/src/layouts/', // Layout folders
-      '/api/', '/src/api/', // API routes
       '/app/', '/src/app/', // Next.js App Router
-      '/routes/', '/src/routes/' // React Router / other frameworks
     ];
     
     if (frameworkPatterns.some(pattern => normalizedPath.includes(pattern))) {

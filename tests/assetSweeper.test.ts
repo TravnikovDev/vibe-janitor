@@ -14,8 +14,8 @@ describe('AssetSweeper Module', () => {
     // Create test folders structure
     await fs.ensureDir(path.join(testDir, 'src'));
     await fs.ensureDir(path.join(testDir, 'public'));
-    await fs.ensureDir(path.join(testDir, 'public/images'));
-    await fs.ensureDir(path.join(testDir, 'public/fonts'));
+    await fs.ensureDir(path.join(testDir, 'folder/images'));
+    await fs.ensureDir(path.join(testDir, 'folder/fonts'));
   });
 
   afterEach(async () => {
@@ -26,8 +26,8 @@ describe('AssetSweeper Module', () => {
   test('should detect unused image files', async () => {
     // Create test files
     const jsFilePath = path.join(testDir, 'src/app.js');
-    const usedImagePath = path.join(testDir, 'public/images/used.png');
-    const unusedImagePath = path.join(testDir, 'public/images/unused.png');
+    const usedImagePath = path.join(testDir, 'folder/images/used.png');
+    const unusedImagePath = path.join(testDir, 'folder/images/unused.png');
 
     // Create a JS file that references only one image
     await fs.writeFile(
@@ -72,8 +72,8 @@ describe('AssetSweeper Module', () => {
   test('should detect and delete unused assets when deleteUnused is true', async () => {
     // Create test files
     const cssFilePath = path.join(testDir, 'src/style.css');
-    const usedFontPath = path.join(testDir, 'public/fonts/used.woff2');
-    const unusedFontPath = path.join(testDir, 'public/fonts/unused.woff2');
+    const usedFontPath = path.join(testDir, 'folder/fonts/used.woff2');
+    const unusedFontPath = path.join(testDir, 'folder/fonts/unused.woff2');
 
     // Create a CSS file that references only one font
     await fs.writeFile(
