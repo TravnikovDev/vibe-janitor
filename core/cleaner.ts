@@ -12,6 +12,10 @@ export interface CleanerOptions {
   removeUnused?: boolean;
   deepScrub?: boolean;
   verbose?: boolean;
+  /**
+   * Whether to delete unused files when found
+   */
+  deleteUnusedFiles?: boolean;
 }
 
 /**
@@ -23,6 +27,14 @@ export interface CleaningResult {
   unusedVariables: { file: string; variables: string[] }[];
   unusedFunctions: { file: string; functions: string[] }[];
   modifiedFiles: string[];
+  /**
+   * Files that were deleted due to being unused
+   */
+  deletedFiles: string[];
+  /**
+   * Total size of unused files in bytes
+   */
+  unusedFilesSize: number;
 }
 
 /**
@@ -114,10 +126,10 @@ export class Cleaner {
                 if (occurrences <= 1) {
                   unusedImports.push(importName);
                 }
-              } catch (error) {
+              } catch {
                 // Skip this named import if there's an error
                 if (this.options.verbose) {
-                  Logger.info(`Error processing named import in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
+                  Logger.info(`Error processing named import in ${sourceFile.getFilePath()}`);
                 }
                 continue;
               }
@@ -139,16 +151,16 @@ export class Cleaner {
                   unusedImports.push(importName);
                 }
               }
-            } catch (error) {
+            } catch {
               // Skip this default import if there's an error
               if (this.options.verbose) {
-                Logger.info(`Error processing default import in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
+                Logger.info(`Error processing default import in ${sourceFile.getFilePath()}`);
               }
             }
-          } catch (error) {
+          } catch {
             // Skip this import declaration if there's an error
             if (this.options.verbose) {
-              Logger.info(`Error processing import declaration in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
+              Logger.info(`Error processing import declaration in ${sourceFile.getFilePath()}`);
             }
             continue;
           }
@@ -160,7 +172,7 @@ export class Cleaner {
             imports: unusedImports,
           });
         }
-      } catch (error) {
+      } catch {
         // Skip this file if there's an error processing it
         Logger.info(`Skipping import analysis for file due to error: ${sourceFile.getFilePath()}`);
         continue;
@@ -220,10 +232,10 @@ export class Cleaner {
                 unusedVariables.push(varName);
               }
             }
-          } catch (error) {
+          } catch {
             // Skip this variable if there's an error processing it
             if (this.options.verbose) {
-              Logger.info(`Error processing variable in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
+              Logger.info(`Error processing variable in ${sourceFile.getFilePath()}`);
             }
             continue;
           }
@@ -235,7 +247,7 @@ export class Cleaner {
             variables: unusedVariables,
           });
         }
-      } catch (error) {
+      } catch {
         // Skip this file if there's an error processing it
         Logger.info(`Skipping variable analysis for file due to error: ${sourceFile.getFilePath()}`);
         continue;
@@ -295,10 +307,10 @@ export class Cleaner {
                 unusedFunctions.push(funcName);
               }
             }
-          } catch (error) {
+          } catch {
             // Skip this function if there's an error processing it
             if (this.options.verbose) {
-              Logger.info(`Error processing function in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
+              Logger.info(`Error processing function in ${sourceFile.getFilePath()}`);
             }
             continue;
           }
@@ -340,18 +352,18 @@ export class Cleaner {
                     unusedFunctions.push(`${className}.${methodName}`);
                   }
                 }
-              } catch (error) {
+              } catch {
                 // Skip this method if there's an error processing it
                 if (this.options.verbose) {
-                  Logger.info(`Error processing method in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
+                  Logger.info(`Error processing method in ${sourceFile.getFilePath()}`);
                 }
                 continue;
               }
             }
-          } catch (error) {
+          } catch {
             // Skip this class if there's an error processing it
             if (this.options.verbose) {
-              Logger.info(`Error processing class in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
+              Logger.info(`Error processing class in ${sourceFile.getFilePath()}`);
             }
             continue;
           }
@@ -363,7 +375,7 @@ export class Cleaner {
             functions: unusedFunctions,
           });
         }
-      } catch (error) {
+      } catch {
         // Skip this file if there's an error processing it
         Logger.info(`Skipping file due to error: ${sourceFile.getFilePath()}`);
         continue;
@@ -432,204 +444,154 @@ export class Cleaner {
 
     // Find entry point files that shouldn't be removed even if "unused"
     const entryPoints = new Set<string>();
+    const importantFiles = new Set<string>();
 
-    // Check for package.json main field
-    const packageJsonPath = path.join(this.targetDir, 'package.json');
-    if (fs.existsSync(packageJsonPath)) {
-      try {
-        const packageJson = fs.readJsonSync(packageJsonPath);
-        if (packageJson.main) {
-          const mainPath = path.resolve(this.targetDir, packageJson.main);
-          entryPoints.add(mainPath);
-        }
-
-        // Check for bin entries
-        if (packageJson.bin) {
-          if (typeof packageJson.bin === 'string') {
-            entryPoints.add(path.resolve(this.targetDir, packageJson.bin));
-          } else if (typeof packageJson.bin === 'object') {
-            Object.values(packageJson.bin).forEach((binPath) => {
-              if (typeof binPath === 'string') {
-                entryPoints.add(path.resolve(this.targetDir, binPath));
-              }
-            });
-          }
-        }
-      } catch {
-        // Ignore package.json parsing errors
-      }
-    }
-
-    // Files that might be unused (no references and not entry points)
-    const unusedFiles = Array.from(allFiles)
-      .filter((file) => !referencedFiles.has(file) && !entryPoints.has(file))
-      // Skip test files, configuration files, and other special files
-      .filter((file) => {
-        const fileName = path.basename(file).toLowerCase();
-        return (
-          !fileName.includes('.test.') &&
-          !fileName.includes('.spec.') &&
-          !fileName.endsWith('.d.ts') &&
-          fileName !== 'package.json' &&
-          fileName !== 'tsconfig.json' &&
-          !fileName.startsWith('.')
-        );
-      });
-
-    return unusedFiles;
-  }
-
-  /**
-   * Remove unused imports from a source file
-   */
-  private removeUnusedImports(sourceFile: SourceFile, unusedImports: string[]): boolean {
-    let modified = false;
-
-    const importDeclarations = sourceFile.getImportDeclarations();
-    for (const importDecl of importDeclarations) {
-      // Handle named imports
-      const namedImports = importDecl.getNamedImports();
-      if (namedImports.length > 0) {
-        const unusedNamedImports = namedImports.filter((namedImport) =>
-          unusedImports.includes(namedImport.getName())
-        );
-
-        if (unusedNamedImports.length === namedImports.length) {
-          // All named imports are unused, remove the entire import
-          importDecl.remove();
-          modified = true;
-        } else if (unusedNamedImports.length > 0) {
-          // Remove only the unused named imports
-          unusedNamedImports.forEach((namedImport) => namedImport.remove());
-          modified = true;
-        }
-      }
-
-      // Handle default imports
-      const defaultImport = importDecl.getDefaultImport();
-      if (defaultImport && unusedImports.includes(defaultImport.getText())) {
-        if (namedImports.length > 0) {
-          // If there are still named imports, remove only the default import
-          defaultImport.replaceWithText('');
-        } else {
-          // If no other imports, remove the entire import
-          importDecl.remove();
-        }
-        modified = true;
-      }
-    }
-
-    return modified;
-  }
-
-  /**
-   * Remove unused variables from a source file
-   */
-  private removeUnusedVariables(sourceFile: SourceFile, unusedVariables: string[]): boolean {
-    let modified = false;
-
-    if (unusedVariables.length === 0) {
-      return modified;
-    }
-
-    const variableDeclarations = sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration);
-    for (const varDecl of variableDeclarations) {
-      const varName = varDecl.getName();
-
-      if (unusedVariables.includes(varName)) {
-        const varList = varDecl.getFirstAncestorByKind(SyntaxKind.VariableDeclarationList);
-        const varStmt = varDecl.getFirstAncestorByKind(SyntaxKind.VariableStatement);
-
-        if (varList && varStmt) {
-          if (varList.getDeclarations().length === 1) {
-            // If this is the only variable in the statement, remove the whole statement
-            varStmt.remove();
-          } else {
-            // Otherwise, just remove this declaration
-            varDecl.remove();
-          }
-          modified = true;
-        }
-      }
-    }
-
-    return modified;
-  }
-
-  /**
-   * Remove unused functions from a source file
-   */
-  private removeUnusedFunctions(sourceFile: SourceFile, unusedFunctions: string[]): boolean {
-    let modified = false;
-
-    if (unusedFunctions.length === 0) {
-      return modified;
-    }
-
-    try {
-      // Handle standalone functions
-      const functionDeclarations = sourceFile.getFunctions();
-      for (const funcDecl of functionDeclarations) {
+    // Add special entry points to the important files set
+    const findEntryPoints = (): void => {
+      // Check for package.json main field
+      const packageJsonPath = path.join(this.targetDir, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
         try {
-          const funcName = funcDecl.getName();
-
-          if (funcName && unusedFunctions.includes(funcName)) {
-            funcDecl.remove();
-            modified = true;
+          const packageJson = fs.readJsonSync(packageJsonPath);
+          importantFiles.add(packageJsonPath); // Add package.json itself
+          
+          if (packageJson.main) {
+            const mainPath = path.resolve(this.targetDir, packageJson.main);
+            entryPoints.add(mainPath);
+            
+            // Also add without extension (to match both .js and .ts files)
+            const mainPathNoExt = mainPath.replace(/\.[^/.]+$/, '');
+            entryPoints.add(mainPathNoExt);
           }
-        } catch (error) {
-          // Skip this function if there's an error removing it
-          if (this.options.verbose) {
-            Logger.info(`Error removing function in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
-          }
-          continue;
-        }
-      }
 
-      // Handle class methods
-      const classDeclarations = sourceFile.getClasses();
-      for (const classDecl of classDeclarations) {
-        try {
-          const className = classDecl.getName() ?? '';
-
-          const methods = classDecl.getMethods();
-          for (const method of methods) {
-            try {
-              const methodName = method.getName();
-              const fullName = `${className}.${methodName}`;
-
-              if (unusedFunctions.includes(fullName)) {
-                method.remove();
-                modified = true;
-              }
-            } catch (error) {
-              // Skip this method if there's an error removing it
-              if (this.options.verbose) {
-                Logger.info(`Error removing method in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
-              }
-              continue;
+          // Check for bin entries
+          if (packageJson.bin) {
+            if (typeof packageJson.bin === 'string') {
+              entryPoints.add(path.resolve(this.targetDir, packageJson.bin));
+            } else if (typeof packageJson.bin === 'object') {
+              Object.values(packageJson.bin).forEach((binPath) => {
+                if (typeof binPath === 'string') {
+                  entryPoints.add(path.resolve(this.targetDir, binPath));
+                }
+              });
             }
           }
-        } catch (error) {
-          // Skip this class if there's an error processing it
-          if (this.options.verbose) {
-            Logger.info(`Error processing class methods in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
-          }
-          continue;
+        } catch {
+          // Ignore package.json parsing errors
         }
       }
-    } catch (error) {
-      // Catch any other errors at the file level
-      if (this.options.verbose) {
-        Logger.info(`Error removing unused functions in ${sourceFile.getFilePath()}: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Add tsconfig.json to important files
+      const tsConfigPath = path.join(this.targetDir, 'tsconfig.json');
+      if (fs.existsSync(tsConfigPath)) {
+        importantFiles.add(tsConfigPath);
       }
-    }
+      
+      // Add README.md to important files
+      const readmePath = path.join(this.targetDir, 'README.md');
+      if (fs.existsSync(readmePath)) {
+        importantFiles.add(readmePath);
+      }
+    };
+    
+    findEntryPoints();
 
-    return modified;
+    // Files that might be unused (no references and not entry points or important files)
+    const potentiallyUnusedFiles = Array.from(allFiles)
+      .filter((file) => !referencedFiles.has(file) && 
+                        !entryPoints.has(file) && 
+                        !importantFiles.has(file) &&
+                        !this.isFileProtected(file));
+
+    if (this.options.verbose && potentiallyUnusedFiles.length > 0) {
+      Logger.info(`Found ${potentiallyUnusedFiles.length} potentially unused files`);
+    }
+    
+    return potentiallyUnusedFiles;
   }
 
   /**
-   * Find circular dependencies in the project
+   * Check if a file should be protected from deletion
+   */
+  private isFileProtected(filePath: string): boolean {
+    const fileName = path.basename(filePath).toLowerCase();
+    const fileExt = path.extname(filePath).toLowerCase();
+    
+    // Skip test files
+    if (fileName.includes('.test.') || fileName.includes('.spec.')) {
+      return true;
+    }
+    
+    // Skip declaration files
+    if (fileExt === '.d.ts') {
+      return true;
+    }
+    
+    // Skip config files
+    if (fileName === 'package.json' || 
+        fileName === 'tsconfig.json' || 
+        fileName === 'jest.config.js' ||
+        fileName === '.eslintrc.js' ||
+        fileName === '.prettierrc' ||
+        fileName.startsWith('.') ||
+        fileName.endsWith('rc') ||
+        fileName.endsWith('rc.js')) {
+      return true;
+    }
+    
+    // Skip files in special directories
+    const relativePath = path.relative(this.targetDir, filePath).toLowerCase();
+    if (relativePath.startsWith('node_modules') || 
+        relativePath.startsWith('dist') || 
+        relativePath.startsWith('build') || 
+        relativePath.startsWith('.git')) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Delete unused files from the file system
+   * @param unusedFiles List of file paths to delete
+   * @returns Array of successfully deleted file paths
+   */
+  private async deleteUnusedFiles(unusedFiles: string[]): Promise<string[]> {
+    const deletedFiles: string[] = [];
+    
+    if (unusedFiles.length === 0 || this.options.dryRun) {
+      return deletedFiles;
+    }
+    
+    for (const filePath of unusedFiles) {
+      try {
+        // Final safety check before deletion
+        if (this.isFileProtected(filePath)) {
+          if (this.options.verbose) {
+            Logger.warn(`Skipping protected file: ${filePath}`);
+          }
+          continue;
+        }
+        
+        // Delete the file
+        await fs.remove(filePath);
+        deletedFiles.push(filePath);
+        
+        if (this.options.verbose) {
+          Logger.success(`Deleted unused file: ${filePath}`);
+        }
+      } catch (error) {
+        Logger.error(
+          `Failed to delete file ${filePath}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+    
+    return deletedFiles;
+  }
+
+  /**
+   * Clean the project by removing unused code and files
    */
   public async clean(): Promise<CleaningResult> {
     const result: CleaningResult = {
@@ -638,6 +600,8 @@ export class Cleaner {
       unusedVariables: [],
       unusedFunctions: [],
       modifiedFiles: [],
+      deletedFiles: [],
+      unusedFilesSize: 0
     };
 
     try {
@@ -660,6 +624,8 @@ export class Cleaner {
         
         try {
           result.unusedFiles = this.findUnusedFiles();
+          // Calculate total size of unused files
+          result.unusedFilesSize = await this.calculateUnusedFilesSize(result.unusedFiles);
         } catch (error) {
           Logger.error(`Error finding unused files: ${error instanceof Error ? error.message : String(error)}`);
         }
@@ -730,18 +696,14 @@ export class Cleaner {
           }
         }
 
-        // Remove unused files if deep scrub is enabled
-        if (this.options.deepScrub && result.unusedFiles.length > 0) {
-          for (const filePath of result.unusedFiles) {
-            try {
-              if (this.options.verbose) {
-                Logger.info(`Removing unused file: ${filePath}`);
-              }
-
-              await fs.remove(filePath);
-            } catch (error) {
-              Logger.error(`Failed to remove file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
-            }
+        // Remove unused files if deep scrub is enabled and deleteUnusedFiles is true
+        if (this.options.deepScrub && 
+            result.unusedFiles.length > 0 && 
+            (this.options.deleteUnusedFiles || this.options.removeUnused)) {
+          result.deletedFiles = await this.deleteUnusedFiles(result.unusedFiles);
+          
+          if (result.deletedFiles.length > 0 && this.options.verbose) {
+            Logger.success(`Deleted ${result.deletedFiles.length} unused files (${this.formatSize(result.unusedFilesSize)})`);
           }
         }
       }
@@ -761,7 +723,7 @@ export class Cleaner {
         Logger.info(
           `Found ${totalFuncs} unused functions across ${result.unusedFunctions.length} files`
         );
-        Logger.info(`Found ${result.unusedFiles.length} potentially unused files`);
+        Logger.info(`Found ${result.unusedFiles.length} potentially unused files (${this.formatSize(result.unusedFilesSize)})`);
 
         if (result.modifiedFiles.length > 0) {
           Logger.info(`Modified ${result.modifiedFiles.length} files`);
@@ -773,5 +735,160 @@ export class Cleaner {
     }
 
     return result;
+  }
+
+  /**
+   * Remove unused imports from a source file
+   */
+  private removeUnusedImports(sourceFile: SourceFile, unusedImports: string[]): boolean {
+    const importDeclarations = sourceFile.getImportDeclarations();
+    let fileModified = false;
+
+    for (const importDecl of importDeclarations) {
+      const namedImports = importDecl.getNamedImports();
+      for (const namedImport of namedImports) {
+        if (unusedImports.includes(namedImport.getName())) {
+          namedImport.remove();
+          fileModified = true;
+        }
+      }
+
+      // Check for unused default imports
+      const defaultImport = importDecl.getDefaultImport();
+      if (defaultImport && unusedImports.includes(defaultImport.getText())) {
+        importDecl.removeDefaultImport();
+        fileModified = true;
+      }
+    }
+
+    return fileModified;
+  }
+
+  /**
+   * Remove unused variables from a source file
+   */
+  private removeUnusedVariables(sourceFile: SourceFile, unusedVariables: string[]): boolean {
+    // Find variable declarations
+    const variableDeclarations = sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration);
+    let fileModified = false;
+
+    for (const varDecl of variableDeclarations) {
+      const varName = varDecl.getName();
+
+      // Skip destructuring patterns (more complex to analyze)
+      if (!varName || varName.includes('{') || varName.includes('[')) {
+        continue;
+      }
+
+      // Skip variables in loops, which may be used implicitly
+      if (
+        varDecl.getFirstAncestorByKind(SyntaxKind.ForStatement) ||
+        varDecl.getFirstAncestorByKind(SyntaxKind.ForOfStatement) ||
+        varDecl.getFirstAncestorByKind(SyntaxKind.ForInStatement)
+      ) {
+        continue;
+      }
+
+      if (unusedVariables.includes(varName)) {
+        varDecl.remove();
+        fileModified = true;
+      }
+    }
+
+    return fileModified;
+  }
+
+  /**
+   * Remove unused functions from a source file
+   */
+  private removeUnusedFunctions(sourceFile: SourceFile, unusedFunctions: string[]): boolean {
+    // Check for function declarations
+    const functionDeclarations = sourceFile.getFunctions();
+    let fileModified = false;
+
+    for (const funcDecl of functionDeclarations) {
+      const funcName = funcDecl.getName();
+
+      // Skip anonymous functions
+      if (!funcName) {
+        continue;
+      }
+
+      if (unusedFunctions.includes(funcName)) {
+        funcDecl.remove();
+        fileModified = true;
+      }
+    }
+
+    // Check for method declarations in classes
+    const classDeclarations = sourceFile.getClasses();
+    for (const classDecl of classDeclarations) {
+      // Skip checking methods in exported classes
+      if (classDecl.isExported()) {
+        continue;
+      }
+
+      const methods = classDecl.getMethods();
+      for (const method of methods) {
+        const methodName = method.getName();
+
+        // Skip private methods, getters, setters, and constructor
+        if (
+          method.hasModifier(SyntaxKind.PrivateKeyword) ||
+          method.hasModifier(SyntaxKind.GetKeyword) ||
+          method.hasModifier(SyntaxKind.SetKeyword) ||
+          methodName === 'constructor'
+        ) {
+          continue;
+        }
+
+        if (unusedFunctions.includes(methodName)) {
+          method.remove();
+          fileModified = true;
+        }
+      }
+    }
+
+    return fileModified;
+  }
+
+  /**
+   * Calculate the size of all unused files
+   */
+  private async calculateUnusedFilesSize(unusedFiles: string[]): Promise<number> {
+    let totalSize = 0;
+    
+    if (unusedFiles.length === 0) {
+      return totalSize;
+    }
+    
+    for (const filePath of unusedFiles) {
+      try {
+        const stats = await fs.stat(filePath);
+        totalSize += stats.size;
+      } catch (error) {
+        if (this.options.verbose) {
+          Logger.info(`Error getting file size for ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+    }
+    
+    return totalSize;
+  }
+
+  /**
+   * Format file size in a human-readable way
+   */
+  private formatSize(bytes: number): string {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let unitIndex = 0;
+
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+
+    return `${size.toFixed(1)} ${units[unitIndex]}`;
   }
 }

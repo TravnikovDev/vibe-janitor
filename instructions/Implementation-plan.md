@@ -35,6 +35,20 @@
 
 - [x] **Output Summary Reporter**
   - [x] Console-based and file-based reporting (e.g., JSON or Markdown)
+
+- [x] **Unused File Remover**
+  - [x] Detect files not imported or referenced anywhere
+  - [x] Provide option to automatically delete unused files
+  - [x] Support safety checks before deletion
+  - [x] Track file sizes and report potential space savings
+  - [x] Add specific CLI flag (`--delete-unused-files`)
+  - [x] Add interactive prompt with colorful warning
+
+- [ ] **CSS/Style Cleaner**
+  - [ ] Scan and analyze CSS/SCSS/LESS files
+  - [ ] Identify unused classes, selectors, and styles
+  - [ ] Prune unused styles from stylesheets
+  - [ ] Handle both standalone and component-level styles
   
 **Deliverables:** Working cleanup modules with dry-run capability
 
@@ -89,18 +103,26 @@
 **Objectives:** Publish, document, and gather early feedback.
 
 - [ ] Push to npm as public CLI tool
-  - [ ] Finalize package.json with all metadata
-  - [ ] Create npm publish workflow
-  - [ ] Write publish documentation
+  - [x] Finalize package.json with all metadata
+  - [x] Create npm publish workflow
+  - [x] Write publish documentation (PUBLISHING.md)
+  - [ ] Perform first official npm release
 - [ ] Add GitHub discussions or feedback form
+  - [ ] Enable Discussions tab in GitHub repository
+  - [ ] Create welcome post with feedback categories
 - [ ] Launch documentation website
   - [ ] Set up VitePress for documentation
   - [ ] Write user guide and API documentation
   - [ ] Add examples and use cases
+  - [ ] Deploy to GitHub Pages or Netlify
 - [ ] Announce on Dev.to, Reddit, Twitter/X, Hacker News
+  - [ ] Create announcement posts with key features highlighted
+  - [ ] Include demo GIFs/videos showing the tool in action
+  - [ ] Collect links to announcements for monitoring
 - [ ] Track issues & prioritize future iterations
-  - [ ] Set up issue templates
+  - [ ] Set up issue templates for bugs, features, and questions
   - [ ] Create roadmap for version 1.0
+  - [ ] Establish contribution guidelines for community
 
 **Deliverables:** Public release with growing user base and documentation
 

@@ -14,6 +14,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
 import prompts from 'prompts';
+import chalk from 'chalk';
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -37,6 +38,7 @@ function initCLI(): Command {
     .option('--deep-scrub', 'Run all available cleanup routines')
     .option('--dry-run', 'Show what would be removed without deleting anything')
     .option('--remove-unused', 'Remove unused files, components, and imports')
+    .option('--delete-unused-files', 'Delete files that are not imported or used anywhere')
     .option('--list', 'List detailed information about unused imports and other issues')
     .option('--report [path]', 'Generate detailed reports (JSON and Markdown)')
     .option('--analyze-complexity', 'Analyze code complexity')
@@ -62,14 +64,14 @@ function initCLI(): Command {
         // Only show interactive prompts when no explicit action flags are provided
         // and interactive is not disabled
         const hasExplicitOptions = Boolean(
-          options.removeUnused ||
-          options.dryRun ||
-          options.deepScrub ||
-          options.list ||
-          options.report ||
-          options.analyzeComplexity ||
-          options.analyzeDependencies ||
-          options.checkCircular ||
+          options.removeUnused ??
+          options.dryRun ??
+          options.deepScrub ??
+          options.list ??
+          options.report ??
+          options.analyzeComplexity ??
+          options.analyzeDependencies ??
+          options.checkCircular ??
           options.generateGraph
         );
 
@@ -208,8 +210,8 @@ function initCLI(): Command {
  * Ask the user for cleanup options interactively
  */
 async function promptForOptions(options: Record<string, unknown>, targetDir: string): Promise<Record<string, unknown> | null> {
-  console.log('\n🧹 Welcome to vibe-janitor interactive setup!\n');
-  console.log(`Target directory: ${targetDir}\n`);
+  Logger.info('\n🧹 Welcome to vibe-janitor interactive setup!');
+  Logger.info(`\nTarget directory: ${targetDir}\n`);
 
   try {
     const responses = await prompts([
@@ -239,6 +241,12 @@ async function promptForOptions(options: Record<string, unknown>, targetDir: str
       },
       {
         type: 'confirm',
+        name: 'deleteUnusedFiles',
+        message: `${chalk.red('Delete')} files that are not imported or used anywhere?`,
+        initial: true
+      },
+      {
+        type: 'confirm',
         name: 'analyzeDependencies',
         message: 'Analyze package dependencies?',
         initial: false
@@ -251,7 +259,7 @@ async function promptForOptions(options: Record<string, unknown>, targetDir: str
       }
     ], {
       onCancel: () => {
-        console.log('\n🚫 Operation cancelled by user');
+        Logger.info('\n🚫 Operation cancelled by user');
         return null;
       }
     });
@@ -259,7 +267,7 @@ async function promptForOptions(options: Record<string, unknown>, targetDir: str
     // Merge the responses with the original options
     return { ...options, ...responses };
   } catch (error) {
-    console.error('Error during interactive prompts:', error);
+    Logger.error(`Error during interactive prompts: ${error instanceof Error ? error.message : String(error)}`);
     return options; // Return original options if prompts fail
   }
 }
@@ -289,6 +297,8 @@ async function runCleanupModules(
       unusedFunctions: [],
       unusedFiles: [],
       modifiedFiles: [],
+      deletedFiles: [],
+      unusedFilesSize: 0
     },
   };
 
@@ -297,6 +307,7 @@ async function runCleanupModules(
     dryRun: Boolean(options.dryRun ?? false),
     removeUnused: Boolean(options.removeUnused ?? false),
     deepScrub: Boolean(options.deepScrub ?? false),
+    deleteUnusedFiles: Boolean(options.deleteUnusedFiles ?? false), 
     verbose: Boolean(options.log ?? false),
   });
 

@@ -127,6 +127,10 @@ export class Reporter {
 
     Logger.log(`  - Potentially unused files: ${cleanerResult.unusedFiles.length}`);
     
+    if (cleanerResult.unusedFilesSize > 0) {
+      Logger.log(`  - Potential space savings from unused files: ${this.formatSize(cleanerResult.unusedFilesSize)}`);
+    }
+    
     // Show detailed unused files if requested
     if (showDetailed && cleanerResult.unusedFiles.length > 0) {
       Logger.log('\n    📋 Potentially unused files:');
@@ -135,14 +139,14 @@ export class Reporter {
         Logger.log(`    - ${relativePath}`);
       });
     }
-
-    if (cleanerResult.modifiedFiles.length > 0) {
-      Logger.log(`  - Modified ${cleanerResult.modifiedFiles.length} files`);
+    
+    if (cleanerResult.deletedFiles && cleanerResult.deletedFiles.length > 0) {
+      Logger.log(`  - Deleted ${cleanerResult.deletedFiles.length} unused files`);
       
-      // Show modified files if requested
+      // Show deleted files if requested
       if (showDetailed) {
-        Logger.log('\n    📋 Modified files:');
-        cleanerResult.modifiedFiles.forEach(file => {
+        Logger.log('\n    📋 Deleted files:');
+        cleanerResult.deletedFiles.forEach(file => {
           const relativePath = file.split('/').slice(-3).join('/');
           Logger.log(`    - ${relativePath}`);
         });
@@ -375,17 +379,21 @@ export class Reporter {
       for (const file of cleanerResult.unusedFiles) {
         markdown += `- ${file}\n`;
       }
+      
+      if (cleanerResult.unusedFilesSize > 0) {
+        markdown += `\n**Potential space savings:** ${this.formatSize(cleanerResult.unusedFilesSize)}\n`;
+      }
     } else {
       markdown += `No unused files found.\n`;
     }
 
     markdown += '\n';
 
-    // Modified files
-    if (cleanerResult.modifiedFiles.length > 0) {
-      markdown += `### Modified Files (${cleanerResult.modifiedFiles.length} total)\n\n`;
+    // Deleted files
+    if (cleanerResult.deletedFiles && cleanerResult.deletedFiles.length > 0) {
+      markdown += `### Deleted Files (${cleanerResult.deletedFiles.length} total)\n\n`;
 
-      for (const file of cleanerResult.modifiedFiles) {
+      for (const file of cleanerResult.deletedFiles) {
         markdown += `- ${file}\n`;
       }
 

@@ -19,6 +19,7 @@
     "format": "prettier --write \"**/*.ts\"",
     "start": "node dist/cli/index.js",
     "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "version": "npm run format && git add -A src",
