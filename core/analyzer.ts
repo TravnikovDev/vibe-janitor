@@ -106,7 +106,13 @@ export class Analyzer {
   private async addFilesToProject(): Promise<void> {
     try {
       const filePatterns = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'];
-      const ignorePatterns = ['**/node_modules/**', '**/dist/**', '**/build/**', '**/*.d.ts', '**/public/**'];
+      const ignorePatterns = [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/build/**',
+        '**/*.d.ts',
+        '**/public/**',
+      ];
 
       const files = await import('fast-glob').then((fg) =>
         fg.default.sync(filePatterns, {

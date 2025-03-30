@@ -70,7 +70,13 @@ export class Cleaner {
    */
   private async addFilesToProject(): Promise<void> {
     const filePatterns = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'];
-    const ignorePatterns = ['**/node_modules/**', '**/dist/**', '**/build/**', '**/*.d.ts', '**/public/**'];
+    const ignorePatterns = [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/*.d.ts',
+      '**/public/**',
+    ];
 
     try {
       const files = await glob(filePatterns, {
@@ -618,8 +624,20 @@ export class Cleaner {
 
     // Check for special directories anywhere in the path
     const specialDirs = [
-      'node_modules', 'dist', 'build', '.git', 'docs', 'examples', 'scripts', 
-      'public', 'static', '.next', '.nuxt', '.output', 'out', '.vercel'
+      'node_modules',
+      'dist',
+      'build',
+      '.git',
+      'docs',
+      'examples',
+      'scripts',
+      'public',
+      'static',
+      '.next',
+      '.nuxt',
+      '.output',
+      'out',
+      '.vercel',
     ];
     for (const dir of specialDirs) {
       if (dirParts.includes(dir)) {
@@ -629,11 +647,13 @@ export class Cleaner {
 
     // Protect framework-specific directories and files
     const frameworkPatterns = [
-      '/pages/', '/src/pages/', // Next.js pages
-      '/app/', '/src/app/', // Next.js App Router
+      '/pages/',
+      '/src/pages/', // Next.js pages
+      '/app/',
+      '/src/app/', // Next.js App Router
     ];
-    
-    if (frameworkPatterns.some(pattern => normalizedPath.includes(pattern))) {
+
+    if (frameworkPatterns.some((pattern) => normalizedPath.includes(pattern))) {
       return true;
     }
 

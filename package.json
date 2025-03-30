@@ -1,6 +1,6 @@
 {
   "name": "vibe-janitor",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A CLI tool that cleans AI-generated JavaScript/TypeScript projects efficiently and intelligently",
   "main": "dist/cli/index.js",
   "type": "module",
@@ -22,7 +22,7 @@
     "check": "npm run typecheck && npm run lint",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
-    "version": "npm run format && git add -A src",
+    "version": "npm run format && git add -A cli core utils types",
     "postversion": "git push && git push --tags"
   },
   "repository": {
