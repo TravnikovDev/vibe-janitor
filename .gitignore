@@ -47,7 +47,7 @@ lerna-debug.log*
 .prettierrc
 
 # Optional npm package lock files
-package-lock.json
+# package-lock.json - keep for GitHub Actions Dependency Review
 yarn.lock
 pnpm-lock.yaml
 
