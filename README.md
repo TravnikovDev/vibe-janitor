@@ -1,11 +1,11 @@
 # vibe-janitor 🧹
 
-<table>
+<table border="0" cellspacing="0" cellpadding="0">
   <tr>
-    <td width="30%" align="center" style="border: none">
+    <td width="30%" align="center">
       <img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" alt="vibe-janitor mascot" width="100%">
     </td>
-    <td width="70%" style="border: none">
+    <td width="70%">
       <p>
         <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
         <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
@@ -14,13 +14,13 @@
       <p>
         <b>Clean up AI-generated JavaScript/TypeScript projects efficiently and intelligently</b>
       </p>
+      <h2>🌟 Overview</h2>
+      <p>
+      AI tools like GitHub Copilot, ChatGPT, or Claude often generate code with unused imports, variables, functions, and assets. **vibe-janitor** automatically identifies and removes these unwanted artifacts, making your codebase cleaner and more efficient.
+      </p>
     </td>
   </tr>
 </table>
-
-## 🌟 Overview
-
-AI tools like GitHub Copilot, ChatGPT, or Claude often generate code with unused imports, variables, functions, and assets. **vibe-janitor** automatically identifies and removes these unwanted artifacts, making your codebase cleaner and more efficient.
 
 ## ✨ Features
 
