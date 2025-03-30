@@ -450,6 +450,32 @@ export class Cleaner {
 
     // First, collect all files referenced by imports
     for (const sourceFile of sourceFiles) {
+      const sourceFilePath = sourceFile.getFilePath();
+      
+      // Skip imports from test files when determining used components
+      const fileName = path.basename(sourceFilePath).toLowerCase();
+      const dirName = path.dirname(sourceFilePath);
+      const isTestFile = 
+        fileName.includes('test.') ||
+        fileName.includes('spec.') ||
+        fileName.includes('jest.') ||
+        fileName.includes('test-') ||
+        dirName.includes('/test') ||
+        dirName.includes('/tests') ||
+        dirName.includes('/__tests__') ||
+        dirName.includes('/__mocks__') ||
+        dirName.includes('/fixtures') ||
+        dirName.includes('/mocks');
+          
+      // If this is a test file and we're in deep scrub mode with deleteUnusedFiles,
+      // don't count its imports as references
+      if (isTestFile && this.options.deepScrub && this.options.deleteUnusedFiles) {
+        if (this.options.verbose) {
+          Logger.info(`Skipping imports from test file: ${sourceFilePath}`);
+        }
+        continue;
+      }
+      
       const importDeclarations = sourceFile.getImportDeclarations();
 
       for (const importDecl of importDeclarations) {
@@ -461,7 +487,7 @@ export class Cleaner {
 
           // Handle relative imports
           if (moduleSpecifier.startsWith('.')) {
-            const sourceDir = path.dirname(sourceFile.getFilePath());
+            const sourceDir = path.dirname(sourceFilePath);
             resolvedPath = path.resolve(sourceDir, moduleSpecifier);
 
             // Try to find the actual file (might need to add extensions)
@@ -570,6 +596,11 @@ export class Cleaner {
     const fileName = path.basename(filePath).toLowerCase();
     const fileExt = path.extname(filePath).toLowerCase();
     const dirName = path.dirname(filePath);
+
+    // Protect global.css files
+    if (fileName === 'global.css') {
+      return true;
+    }
 
     // Skip test files - more comprehensive check
     if (
@@ -863,6 +894,10 @@ export class Cleaner {
           if (result.deletedFiles.length > 0 && this.options.verbose) {
             Logger.success(
               `Deleted ${result.deletedFiles.length} unused files (${this.formatSize(result.unusedFilesSize)})`
+            );
+          } else if (result.unusedFiles.length > 0 && result.deletedFiles.length === 0 && this.options.verbose) {
+            Logger.info(
+              `Found ${result.unusedFiles.length} potential unused files, but all were protected from deletion`
             );
           }
         }

@@ -191,4 +191,16 @@ describe('File Protection Feature', () => {
       // Relative paths aren't directly testable as they need the project context
     });
   });
+
+  describe('CSS Files Protection', () => {
+    test('should protect global.css files', () => {
+      const globalCssFile = path.join(testDir, 'src', 'global.css');
+      const globalCssInStyles = path.join(testDir, 'src', 'styles', 'global.css');
+      const regularCssFile = path.join(testDir, 'src', 'styles.css');
+      
+      expect(isFileProtected(globalCssFile)).toBe(true);
+      expect(isFileProtected(globalCssInStyles)).toBe(true);
+      expect(isFileProtected(regularCssFile)).toBe(false);
+    });
+  });
 });
