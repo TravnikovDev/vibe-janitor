@@ -52,10 +52,31 @@ export class Analyzer {
       verbose: options.verbose ?? false,
     };
 
-    this.project = new Project({
-      tsConfigFilePath: this.findTsConfig(),
-      skipAddingFilesFromTsConfig: true,
-    });
+    try {
+      // Try to initialize with tsconfig if it exists
+      const tsConfigPath = this.findTsConfig();
+      if (tsConfigPath) {
+        this.project = new Project({
+          tsConfigFilePath: tsConfigPath,
+          skipAddingFilesFromTsConfig: true,
+        });
+      } else {
+        // Fall back to basic compiler options
+        this.project = new Project({
+          compilerOptions: {
+            target: 99, // ScriptTarget.ES2020
+            module: 99, // ModuleKind.ESNext
+            moduleResolution: 2, // ModuleResolutionKind.NodeJs
+            esModuleInterop: true
+          },
+          skipAddingFilesFromTsConfig: true,
+        });
+      }
+    } catch (error) {
+      // If Project initialization fails, create with default settings
+      Logger.error(`Error initializing ts-morph Project: ${error instanceof Error ? error.message : String(error)}`);
+      this.project = new Project();
+    }
   }
 
   /**
@@ -63,8 +84,14 @@ export class Analyzer {
    */
   private findTsConfig(): string | undefined {
     const tsConfigPath = path.join(this.targetDir, 'tsconfig.json');
-    if (fs.existsSync(tsConfigPath)) {
-      return tsConfigPath;
+    try {
+      if (fs.existsSync(tsConfigPath)) {
+        return tsConfigPath;
+      }
+    } catch (error) {
+      // If we can't access the file system or the file doesn't exist,
+      // return undefined and let the Project initialize without a tsconfig
+      Logger.warn(`Could not access tsconfig at ${tsConfigPath}: ${error instanceof Error ? error.message : String(error)}`);
     }
     return undefined;
   }

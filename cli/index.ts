@@ -5,7 +5,7 @@ import { Reporter } from '../utils/reporter.js';
 import { Cleaner, CleaningResult } from '../core/cleaner.js';
 import { AssetSweeper, AssetSweepResult } from '../core/assetSweeper.js';
 import { StyleCleaner, StyleCleaningResult } from '../core/styleCleaner.js';
-import { Analyzer, AnalysisResult } from '../core/analyzer.js';
+import { AnalysisResult } from '../core/analyzer.js';
 import { DependencyAuditor, DependencyAuditResult } from '../core/dependencyAuditor.js';
 import {
   CircularDependencyScanner,

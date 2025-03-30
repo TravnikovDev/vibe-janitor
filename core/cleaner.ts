@@ -125,7 +125,7 @@ export class Cleaner {
 
                 // Improved regex pattern to match whole words only
                 const importNameRegex = new RegExp(`\\b${this.escapeRegExp(importName)}\\b`, 'g');
-                const matches = fileText.match(importNameRegex) || [];
+                const matches = fileText.match(importNameRegex) ?? [];
                 
                 // The first match is the import declaration itself
                 // If there's only 1 or fewer occurrences, it's unused
@@ -133,6 +133,7 @@ export class Cleaner {
                   unusedImports.push(importName);
                 }
               } catch (error) {
+                console.error(`Error processing named import: ${error}`);
                 // Skip this named import if there's an error
                 if (this.options.verbose) {
                   Logger.info(`Error processing named import in ${sourceFile.getFilePath()}`);
@@ -149,7 +150,7 @@ export class Cleaner {
                 
                 // Improved regex pattern to match whole words only
                 const importNameRegex = new RegExp(`\\b${this.escapeRegExp(importName)}\\b`, 'g');
-                const matches = fileText.match(importNameRegex) || [];
+                const matches = fileText.match(importNameRegex) ?? [];
                 
                 // The first match is the import declaration itself
                 // If there's only 1 or fewer occurrences, it's unused
@@ -158,6 +159,7 @@ export class Cleaner {
                 }
               }
             } catch (error) {
+              console.error(`Error processing default import: ${error}`);
               // Skip this default import if there's an error
               if (this.options.verbose) {
                 Logger.info(`Error processing default import in ${sourceFile.getFilePath()}`);
@@ -172,7 +174,7 @@ export class Cleaner {
                 
                 // Improved regex pattern to match whole words only
                 const importNameRegex = new RegExp(`\\b${this.escapeRegExp(importName)}\\b`, 'g');
-                const matches = fileText.match(importNameRegex) || [];
+                const matches = fileText.match(importNameRegex) ?? [];
                 
                 // The first match is the import declaration itself
                 // If there's only 1 or fewer occurrences, it's unused
@@ -181,6 +183,7 @@ export class Cleaner {
                 }
               }
             } catch (error) {
+              console.error(`Error processing namespace import: ${error}`); 
               // Skip this namespace import if there's an error
               if (this.options.verbose) {
                 Logger.info(`Error processing namespace import in ${sourceFile.getFilePath()}`);
@@ -188,6 +191,7 @@ export class Cleaner {
             }
             
           } catch (error) {
+            console.error(`Error processing import declaration: ${error}`);
             // Skip this import declaration if there's an error
             if (this.options.verbose) {
               Logger.info(`Error processing import declaration in ${sourceFile.getFilePath()}`);
@@ -203,6 +207,7 @@ export class Cleaner {
           });
         }
       } catch (error) {
+        console.error(`Error processing source file: ${error}`);
         // Skip this file if there's an error processing it
         Logger.info(`Skipping import analysis for file due to error: ${sourceFile.getFilePath()}`);
         continue;
@@ -597,17 +602,26 @@ export class Cleaner {
     }
     
     // Skip files in special directories (including nested ones)
+    const normalizedPath = filePath.toLowerCase().replace(/\\/g, '/');
+    const dirParts = normalizedPath.split('/');
+    
+    // Check for special directories anywhere in the path
+    const specialDirs = ['node_modules', 'dist', 'build', '.git', 'docs', 'examples', 'scripts'];
+    for (const dir of specialDirs) {
+      if (dirParts.includes(dir)) {
+        return true;
+      }
+    }
+    
+    // Also check using the relative path approach as a fallback
     const relativePath = path.relative(this.targetDir, filePath).toLowerCase();
     if (relativePath.startsWith('node_modules') || 
         relativePath.startsWith('dist') || 
         relativePath.startsWith('build') || 
         relativePath.startsWith('.git') ||
-        relativePath.includes('/docs/') ||
-        relativePath.includes('/examples/') ||
-        relativePath.includes('/scripts/') ||
-        relativePath.endsWith('/docs') ||
-        relativePath.endsWith('/examples') ||
-        relativePath.endsWith('/scripts')) {
+        relativePath.includes('/docs') ||
+        relativePath.includes('/examples') ||
+        relativePath.includes('/scripts')) {
       return true;
     }
     

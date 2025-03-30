@@ -2,15 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 
-// Mock dependencies before importing tested module
-jest.mock('../utils/logger.js', () => ({
-  Logger: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    success: jest.fn(),
-  }
-}));
+// No jest import needed
 
 // Now import the module under test
 import { Cleaner } from '../core/cleaner.js';
@@ -192,9 +184,8 @@ describe('File Protection Feature', () => {
       expect(isFileProtected(pathWithUnicode)).toBe(true);
     });
     
-    test('should handle absolute vs relative paths', () => {
+    test('should handle absolute paths', () => {
       const absolutePath = path.join(testDir, 'tests', 'component.test.js');
-      const relativePath = 'tests/component.test.js';
       
       expect(isFileProtected(absolutePath)).toBe(true);
       // Relative paths aren't directly testable as they need the project context

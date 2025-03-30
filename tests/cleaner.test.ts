@@ -2,15 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 
-// Mock dependencies before importing tested module
-jest.mock('../utils/logger.js', () => ({
-  Logger: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    success: jest.fn(),
-  }
-}));
+// No jest import needed
 
 // Now import the module under test
 import { Cleaner } from '../core/cleaner.js';

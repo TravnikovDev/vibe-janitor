@@ -2,6 +2,22 @@ import fs from 'fs-extra';
 import type { PathLike } from 'fs';
 
 /**
+ * Creates a mock function that can be called like a Jest mock
+ */
+function createMockFn<T extends (...args: any[]) => any>(implementation: T): T {
+  const mockFn = function(...args: any[]) {
+    return implementation(...args);
+  };
+  
+  // Add mockImplementation method to simulate Jest's mock functionality
+  (mockFn as any).mockImplementation = (impl: T) => {
+    return createMockFn(impl);
+  };
+  
+  return mockFn as any;
+}
+
+/**
  * Mock implementation for file system operations
  * This allows tests to run without touching the actual file system
  */
@@ -33,47 +49,44 @@ export class FsMock {
       this.mockFiles.set(path, content);
     }
 
-    // Use type assertions to mock fs methods
-    // This ensures TypeScript doesn't complain about read-only properties
-    const mockReadFile = jest.fn().mockImplementation((path: PathLike, options: any, callback?: any) => {
-        if (!callback && typeof options === 'function') {
-          callback = options;
-          options = 'utf8';
-        }
+    // Create mock implementations without relying on Jest
+    const mockReadFile = createMockFn((path: PathLike, options: any, callback?: any) => {
+      if (!callback && typeof options === 'function') {
+        callback = options;
+        options = 'utf8';
+      }
 
-        const normalizedPath = this.normalizePath(path);
+      const normalizedPath = this.normalizePath(path);
 
-        if (this.mockFiles.has(normalizedPath)) {
-          const content = this.mockFiles.get(normalizedPath);
-          return callback ? callback(null, content) : Promise.resolve(content);
-        } else {
-          const error = new Error(`ENOENT: no such file or directory, open '${normalizedPath}'`);
-          return callback ? callback(error) : Promise.reject(error);
-        }
-      });
+      if (this.mockFiles.has(normalizedPath)) {
+        const content = this.mockFiles.get(normalizedPath);
+        return callback ? callback(null, content) : Promise.resolve(content);
+      } else {
+        const error = new Error(`ENOENT: no such file or directory, open '${normalizedPath}'`);
+        return callback ? callback(error) : Promise.reject(error);
+      }
+    });
 
-    const mockWriteFile = jest
-      .fn()
-      .mockImplementation((path: PathLike, data: any, options: any, callback?: any) => {
-        if (!callback && typeof options === 'function') {
-          callback = options;
-          options = 'utf8';
-        }
+    const mockWriteFile = createMockFn((path: PathLike, data: any, options: any, callback?: any) => {
+      if (!callback && typeof options === 'function') {
+        callback = options;
+        options = 'utf8';
+      }
 
-        const normalizedPath = this.normalizePath(path);
-        const content = typeof data === 'string' ? data : data.toString();
+      const normalizedPath = this.normalizePath(path);
+      const content = typeof data === 'string' ? data : data.toString();
 
-        this.mockFiles.set(normalizedPath, content);
+      this.mockFiles.set(normalizedPath, content);
 
-        return callback ? callback(null) : Promise.resolve();
-      });
+      return callback ? callback(null) : Promise.resolve();
+    });
 
-    const mockExistsSync = jest.fn().mockImplementation((path: PathLike) => {
+    const mockExistsSync = createMockFn((path: PathLike) => {
       const normalizedPath = this.normalizePath(path);
       return this.mockFiles.has(normalizedPath);
     });
 
-    const mockReadFileSync = jest.fn().mockImplementation((path: PathLike, _options: any) => {
+    const mockReadFileSync = createMockFn((path: PathLike, _options: any) => {
       // Using _options with underscore to indicate it's intentionally unused
       const normalizedPath = this.normalizePath(path);
 
@@ -84,27 +97,25 @@ export class FsMock {
       }
     });
 
-    const mockReaddir = jest
-      .fn()
-      .mockImplementation((path: PathLike, options: any, callback?: any) => {
-        if (!callback && typeof options === 'function') {
-          callback = options;
-          options = {};
-        }
+    const mockReaddir = createMockFn((path: PathLike, options: any, callback?: any) => {
+      if (!callback && typeof options === 'function') {
+        callback = options;
+        options = {};
+      }
 
-        const normalizedPath = this.normalizePath(path);
-        const dirs = Array.from(this.mockFiles.keys())
-          .filter((filePath) => filePath.startsWith(`${normalizedPath}/`))
-          .map((filePath) => {
-            const relativePath = filePath.substring(normalizedPath.length + 1);
-            return relativePath.split('/')[0];
-          })
-          .filter((value, index, self) => self.indexOf(value) === index); // Unique values
+      const normalizedPath = this.normalizePath(path);
+      const dirs = Array.from(this.mockFiles.keys())
+        .filter((filePath) => filePath.startsWith(`${normalizedPath}/`))
+        .map((filePath) => {
+          const relativePath = filePath.substring(normalizedPath.length + 1);
+          return relativePath.split('/')[0];
+        })
+        .filter((value, index, self) => self.indexOf(value) === index); // Unique values
 
-        return callback ? callback(null, dirs) : Promise.resolve(dirs);
-      });
+      return callback ? callback(null, dirs) : Promise.resolve(dirs);
+    });
 
-    const mockStat = jest.fn().mockImplementation((path: PathLike, callback?: any) => {
+    const mockStat = createMockFn((path: PathLike, callback?: any) => {
       const normalizedPath = this.normalizePath(path);
 
       if (this.mockFiles.has(normalizedPath)) {

@@ -1,8 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import glob from 'fast-glob';
-import postcss from 'postcss';
-import cssTree from 'css-tree';
+import * as cssTree from 'css-tree';
 import { Logger } from '../utils/logger.js';
 
 /**
@@ -222,7 +221,7 @@ export class StyleCleaner {
               const classes = match[1].split(/\s+/);
               
               for (const className of classes) {
-                if (className && className.trim() && classMap.has(className.trim())) {
+                if (classMap.get(className?.trim())) {
                   const selector = classMap.get(className.trim());
                   if (selector) {
                     selector.used = true;
@@ -283,12 +282,12 @@ export class StyleCleaner {
    */
   private async removeUnusedSelectors(
     unusedSelectors: { file: string; selectors: string[] }[]
-  ): Promise<string[]> {
+  ): Promise<{ modifiedFiles: string[], bytesRemoved: number }> {
     const modifiedFiles: string[] = [];
     let bytesRemoved = 0;
 
     if (this.options.dryRun || !this.options.removeUnused) {
-      return modifiedFiles;
+      return { modifiedFiles, bytesRemoved };
     }
 
     for (const entry of unusedSelectors) {
@@ -363,7 +362,7 @@ export class StyleCleaner {
       }
     }
 
-    return modifiedFiles;
+    return { modifiedFiles, bytesRemoved };
   }
 
   /**
@@ -438,11 +437,12 @@ export class StyleCleaner {
 
       // Remove unused selectors if requested
       if (!this.options.dryRun && this.options.removeUnused && result.totalUnusedSelectors > 0) {
-        const modifiedFiles = await this.removeUnusedSelectors(unusedSelectors);
+        const { modifiedFiles, bytesRemoved } = await this.removeUnusedSelectors(unusedSelectors);
         result.modifiedFiles = modifiedFiles;
+        result.bytesRemoved = bytesRemoved;
 
         if (this.options.verbose && modifiedFiles.length > 0) {
-          Logger.success(`Cleaned ${modifiedFiles.length} CSS files`);
+          Logger.success(`Cleaned ${modifiedFiles.length} CSS files (${this.formatSize(bytesRemoved)} removed)`);
         }
       } else if (result.totalUnusedSelectors > 0) {
         if (this.options.verbose) {
