@@ -671,7 +671,9 @@ export class Cleaner {
       '.vercel',
     ];
     for (const dir of specialDirs) {
-      if (dirParts.includes(dir)) {
+      // Check both for directory parts and paths that contain the directory name
+      // This ensures we protect things like /static/, /static-assets/, etc.
+      if (dirParts.includes(dir) || normalizedPath.includes(`/${dir}/`) || normalizedPath.startsWith(`${dir}/`)) {
         return true;
       }
     }
@@ -707,6 +709,22 @@ export class Cleaner {
       relativePath.includes('/scripts') ||
       relativePath.includes('/public') ||
       relativePath.includes('/static')
+    ) {
+      return true;
+    }
+    
+    // Additional check for common static assets like favicon
+    if (
+      fileName === 'favicon.ico' ||
+      fileName.startsWith('favicon-') ||
+      fileName.startsWith('favicon.') ||
+      fileName.startsWith('icon-') ||
+      fileName.includes('.svg') ||
+      fileName.includes('.ico') ||
+      fileName.includes('.png') ||
+      fileName.includes('.jpg') ||
+      fileName.includes('.jpeg') ||
+      fileName.includes('.gif')
     ) {
       return true;
     }
