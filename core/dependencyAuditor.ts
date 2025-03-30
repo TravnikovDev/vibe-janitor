@@ -307,8 +307,8 @@ export class DependencyAuditor {
     try {
       const packageJson = await fs.readJson(packageJsonPath);
       const dependencies = {
-        ...(packageJson.dependencies || {}),
-        ...(packageJson.devDependencies || {}),
+        ...(packageJson.dependencies ?? {}),
+        ...(packageJson.devDependencies ?? {}),
       };
 
       // Detect Gatsby
@@ -388,7 +388,7 @@ export class DependencyAuditor {
           !this.options.ignoreMatches?.includes(tool)
         ) {
           // If we find a config file for a tool, ensure it's not considered unused
-          this.options.ignoreMatches = [...(this.options.ignoreMatches || []), tool];
+          this.options.ignoreMatches = [...(this.options.ignoreMatches ?? []), tool];
         }
       }
     } catch (error) {
