@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { CleaningResult } from '../core/cleaner.js';
 import { AssetSweepResult } from '../core/assetSweeper.js';
+import { StyleCleaningResult } from '../core/styleCleaner.js';
 import { Logger } from './logger.js';
 
 /**
@@ -55,7 +56,8 @@ export class Reporter {
   public generateConsoleSummary(
     cleanerResult: CleaningResult,
     assetResult?: AssetSweepResult,
-    showDetailed: boolean = false
+    showDetailed: boolean = false,
+    styleResult?: StyleCleaningResult
   ): void {
     Logger.log('\n📝 Cleanup Summary:');
 
@@ -218,6 +220,40 @@ export class Reporter {
       Logger.log('\n💡 For detailed information on these issues, run: npx vibe-janitor --list');
       Logger.log('💡 To automatically fix these issues, run: npx vibe-janitor --remove-unused');
     }
+
+    // Style cleaning results
+    if (styleResult) {
+      Logger.log(`\n🎨 CSS Style Analysis:`);
+      Logger.log(`  - Analyzed CSS files: ${styleResult.analyzedFiles}`);
+      Logger.log(`  - Total CSS selectors found: ${styleResult.totalSelectorsFound}`);
+      Logger.log(`  - Unused CSS selectors: ${styleResult.totalUnusedSelectors}`);
+      
+      if (styleResult.modifiedFiles.length > 0) {
+        Logger.log(`  - Cleaned ${styleResult.modifiedFiles.length} CSS files`);
+      }
+
+      // Show detailed style info if requested
+      if (showDetailed && styleResult.unusedSelectors.length > 0) {
+        Logger.log('\n    📋 Unused CSS selectors details:');
+        styleResult.unusedSelectors.forEach(file => {
+          const relativePath = file.file.split('/').slice(-3).join('/');
+          Logger.log(`    - ${relativePath} (${file.selectors.length} unused):`);
+          // Show up to 10 selectors to avoid flooding the console
+          const MAX_SELECTORS_TO_SHOW = 10;
+          file.selectors.slice(0, MAX_SELECTORS_TO_SHOW).forEach(selector => {
+            Logger.log(`      • ${selector}`);
+          });
+          
+          if (file.selectors.length > MAX_SELECTORS_TO_SHOW) {
+            Logger.log(`      • ... and ${file.selectors.length - MAX_SELECTORS_TO_SHOW} more`);
+          }
+        });
+        
+        if (styleResult.modifiedFiles.length === 0) {
+          Logger.log('\n    💡 To remove unused CSS selectors, run: npx vibe-janitor --clean-styles --remove-unused');
+        }
+      }
+    }
   }
 
   /**
@@ -241,7 +277,8 @@ export class Reporter {
    */
   public async generateJsonReport(
     cleanerResult: CleaningResult,
-    assetResult?: AssetSweepResult
+    assetResult?: AssetSweepResult,
+    styleResult?: StyleCleaningResult
   ): Promise<string> {
     if (!this.options.generateJson) {
       return '';
@@ -266,6 +303,16 @@ export class Reporter {
             unusedStyles: assetResult.unusedStyles,
             totalSize: assetResult.totalSize,
             deletedAssets: assetResult.deletedAssets,
+          }
+        : undefined,
+      styleCleaning: styleResult
+        ? {
+            analyzedFiles: styleResult.analyzedFiles,
+            totalSelectorsFound: styleResult.totalSelectorsFound,
+            unusedSelectors: styleResult.unusedSelectors,
+            totalUnusedSelectors: styleResult.totalUnusedSelectors,
+            modifiedFiles: styleResult.modifiedFiles,
+            bytesRemoved: styleResult.bytesRemoved,
           }
         : undefined,
     };
@@ -296,7 +343,8 @@ export class Reporter {
    */
   public async generateMarkdownReport(
     cleanerResult: CleaningResult,
-    assetResult?: AssetSweepResult
+    assetResult?: AssetSweepResult,
+    styleResult?: StyleCleaningResult
   ): Promise<string> {
     if (!this.options.generateMarkdown) {
       return '';
@@ -459,6 +507,54 @@ export class Reporter {
       }
     }
 
+    // Style cleanup section
+    if (styleResult) {
+      markdown += `## 🎨 CSS Style Cleanup\n\n`;
+      markdown += `### Summary\n\n`;
+      markdown += `- Analyzed CSS files: ${styleResult.analyzedFiles}\n`;
+      markdown += `- Total CSS selectors found: ${styleResult.totalSelectorsFound}\n`;
+      markdown += `- Unused CSS selectors: ${styleResult.totalUnusedSelectors}\n`;
+      
+      if (styleResult.modifiedFiles.length > 0) {
+        markdown += `- Modified CSS files: ${styleResult.modifiedFiles.length}\n`;
+        markdown += `- Bytes removed: ${this.formatSize(styleResult.bytesRemoved)}\n`;
+      }
+      
+      markdown += '\n';
+
+      // Unused selectors
+      markdown += `### Unused CSS Selectors (${styleResult.totalUnusedSelectors} total)\n\n`;
+
+      if (styleResult.unusedSelectors.length > 0) {
+        for (const file of styleResult.unusedSelectors) {
+          markdown += `- **${file.file}** (${file.selectors.length} unused selectors)\n`;
+          
+          // Group selectors into chunks of 10 for readability
+          const CHUNK_SIZE = 10;
+          for (let i = 0; i < file.selectors.length; i += CHUNK_SIZE) {
+            const chunk = file.selectors.slice(i, i + CHUNK_SIZE);
+            const selectorList = chunk.map(s => `\`${s}\``).join(', ');
+            markdown += `  - ${selectorList}\n`;
+          }
+        }
+      } else {
+        markdown += `No unused CSS selectors found.\n`;
+      }
+
+      markdown += '\n';
+
+      // Modified files
+      if (styleResult.modifiedFiles.length > 0) {
+        markdown += `### Modified CSS Files (${styleResult.modifiedFiles.length} total)\n\n`;
+
+        for (const file of styleResult.modifiedFiles) {
+          markdown += `- ${file}\n`;
+        }
+
+        markdown += '\n';
+      }
+    }
+
     // Create filename with proper prefix in the report directory
     const outputPath = this.options.outputPath ?? 'vibe-janitor-report';
     const filename = `${path.basename(outputPath)}-main.md`;
@@ -485,10 +581,11 @@ export class Reporter {
    */
   public async generateReports(
     cleanerResult: CleaningResult,
-    assetResult?: AssetSweepResult
+    assetResult?: AssetSweepResult,
+    styleResult?: StyleCleaningResult
   ): Promise<{ jsonPath: string; markdownPath: string }> {
-    const jsonPath = await this.generateJsonReport(cleanerResult, assetResult);
-    const markdownPath = await this.generateMarkdownReport(cleanerResult, assetResult);
+    const jsonPath = await this.generateJsonReport(cleanerResult, assetResult, styleResult);
+    const markdownPath = await this.generateMarkdownReport(cleanerResult, assetResult, styleResult);
 
     return { jsonPath, markdownPath };
   }

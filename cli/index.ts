@@ -4,6 +4,7 @@ import { Logger } from '../utils/logger.js';
 import { Reporter } from '../utils/reporter.js';
 import { Cleaner, CleaningResult } from '../core/cleaner.js';
 import { AssetSweeper, AssetSweepResult } from '../core/assetSweeper.js';
+import { StyleCleaner, StyleCleaningResult } from '../core/styleCleaner.js';
 import { Analyzer, AnalysisResult } from '../core/analyzer.js';
 import { DependencyAuditor, DependencyAuditResult } from '../core/dependencyAuditor.js';
 import {
@@ -39,6 +40,7 @@ function initCLI(): Command {
     .option('--dry-run', 'Show what would be removed without deleting anything')
     .option('--remove-unused', 'Remove unused files, components, and imports')
     .option('--delete-unused-files', 'Delete files that are not imported or used anywhere')
+    .option('--clean-styles', 'Clean unused CSS classes and selectors')
     .option('--list', 'List detailed information about unused imports and other issues')
     .option('--report [path]', 'Generate detailed reports (JSON and Markdown)')
     .option('--analyze-complexity', 'Analyze code complexity')
@@ -109,7 +111,12 @@ function initCLI(): Command {
             verbose: options.log,
           });
 
-          reporter.generateConsoleSummary(results.cleanerResult, results.assetResult, Boolean(options.list));
+          reporter.generateConsoleSummary(
+            results.cleanerResult, 
+            results.assetResult, 
+            Boolean(options.list),
+            results.styleResult
+          );
 
           // Show dependency analysis if requested
           if (options.analyzeDependencies && results.dependencyResult) {
@@ -179,7 +186,8 @@ function initCLI(): Command {
           if (options.report) {
             const reportPaths = await reporter.generateReports(
               results.cleanerResult,
-              results.assetResult
+              results.assetResult,
+              results.styleResult
             );
 
             if (reportPaths.markdownPath || reportPaths.jsonPath) {
@@ -241,6 +249,12 @@ async function promptForOptions(options: Record<string, unknown>, targetDir: str
       },
       {
         type: 'confirm',
+        name: 'cleanStyles',
+        message: 'Clean unused CSS classes and selectors?',
+        initial: false
+      },
+      {
+        type: 'confirm',
         name: 'deleteUnusedFiles',
         message: `${chalk.red('Delete')} files that are not imported or used anywhere?`,
         initial: true
@@ -278,6 +292,7 @@ async function promptForOptions(options: Record<string, unknown>, targetDir: str
 interface CleanupModulesResult {
   cleanerResult: CleaningResult;
   assetResult?: AssetSweepResult;
+  styleResult?: StyleCleaningResult;
   complexityResult?: AnalysisResult;
   dependencyResult?: DependencyAuditResult;
   circularResult?: CircularDependencyResult;
@@ -333,28 +348,30 @@ async function runCleanupModules(
     results.assetResult = await assetSweeper.sweep();
   }
 
-  // Run complexity analysis if requested
-  if (options.analyzeComplexity) {
-    const analyzer = new Analyzer(targetDir, {
+  // Run style cleanup if requested
+  if (options.cleanStyles || options.deepScrub) {
+    const styleCleaner = new StyleCleaner(targetDir, {
+      dryRun: Boolean(options.dryRun ?? false),
+      removeUnused: Boolean(options.removeUnused ?? false),
+      scanComponents: true,
       verbose: Boolean(options.log ?? false),
     });
 
     if (!options.quiet && options.log) {
-      Logger.info('Running complexity analysis...');
+      Logger.info('Running CSS style cleanup...');
     }
 
-    results.complexityResult = await analyzer.analyze();
+    results.styleResult = await styleCleaner.clean();
 
-    if (!options.quiet && options.log && results.complexityResult) {
-      Logger.info(`Found ${results.complexityResult.largeFiles.length} large files`);
-      Logger.info(`Found ${results.complexityResult.complexFunctions.length} complex functions`);
-      Logger.info(
-        `Found ${results.complexityResult.deeplyNested.length} deeply nested code blocks`
-      );
+    if (!options.quiet && options.log && results.styleResult) {
+      Logger.info(`Found ${results.styleResult.totalUnusedSelectors} unused CSS selectors across ${results.styleResult.unusedSelectors.length} files`);
+      if (results.styleResult.modifiedFiles.length > 0) {
+        Logger.success(`Cleaned ${results.styleResult.modifiedFiles.length} CSS files`);
+      }
     }
   }
 
-  // Run dependency analysis if requested
+  // Run complexity analysis if requested
   if (options.analyzeDependencies || options.deepScrub) {
     const dependencyAuditor = new DependencyAuditor(targetDir, {
       verbose: Boolean(options.log ?? false),

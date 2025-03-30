@@ -107,26 +107,32 @@ export class Cleaner {
     for (const sourceFile of sourceFiles) {
       try {
         const unusedImports: string[] = [];
+        const fileText = sourceFile.getText();
 
         const importDeclarations = sourceFile.getImportDeclarations();
         for (const importDecl of importDeclarations) {
           try {
+            // Handle named imports (e.g., import { useState, useEffect } from 'react')
             const namedImports = importDecl.getNamedImports();
-
             for (const namedImport of namedImports) {
               try {
                 const importName = namedImport.getName();
+                
+                // Skip imports that have aliases - these are harder to track
+                if (namedImport.getAliasNode()) {
+                  continue;
+                }
 
-                // Count references by using identifier text search
-                const text = sourceFile.getText();
-                const importNameRegex = new RegExp(`\\b${importName}\\b`, 'g');
-                const occurrences = (text.match(importNameRegex) ?? []).length;
-
-                // If there's only one occurrence (the import itself), it's unused
-                if (occurrences <= 1) {
+                // Improved regex pattern to match whole words only
+                const importNameRegex = new RegExp(`\\b${this.escapeRegExp(importName)}\\b`, 'g');
+                const matches = fileText.match(importNameRegex) || [];
+                
+                // The first match is the import declaration itself
+                // If there's only 1 or fewer occurrences, it's unused
+                if (matches.length <= 1) {
                   unusedImports.push(importName);
                 }
-              } catch {
+              } catch (error) {
                 // Skip this named import if there's an error
                 if (this.options.verbose) {
                   Logger.info(`Error processing named import in ${sourceFile.getFilePath()}`);
@@ -135,29 +141,53 @@ export class Cleaner {
               }
             }
 
-            // Check for unused default imports
+            // Handle default imports (e.g., import React from 'react')
             try {
               const defaultImport = importDecl.getDefaultImport();
               if (defaultImport) {
                 const importName = defaultImport.getText();
-
-                // Count references by using identifier text search
-                const text = sourceFile.getText();
-                const importNameRegex = new RegExp(`\\b${importName}\\b`, 'g');
-                const occurrences = (text.match(importNameRegex) ?? []).length;
-
-                // If there's only one occurrence (the import itself), it's unused
-                if (occurrences <= 1) {
+                
+                // Improved regex pattern to match whole words only
+                const importNameRegex = new RegExp(`\\b${this.escapeRegExp(importName)}\\b`, 'g');
+                const matches = fileText.match(importNameRegex) || [];
+                
+                // The first match is the import declaration itself
+                // If there's only 1 or fewer occurrences, it's unused
+                if (matches.length <= 1) {
                   unusedImports.push(importName);
                 }
               }
-            } catch {
+            } catch (error) {
               // Skip this default import if there's an error
               if (this.options.verbose) {
                 Logger.info(`Error processing default import in ${sourceFile.getFilePath()}`);
               }
             }
-          } catch {
+            
+            // Handle namespace imports (e.g., import * as React from 'react')
+            try {
+              const namespaceImport = importDecl.getNamespaceImport();
+              if (namespaceImport) {
+                const importName = namespaceImport.getText();
+                
+                // Improved regex pattern to match whole words only
+                const importNameRegex = new RegExp(`\\b${this.escapeRegExp(importName)}\\b`, 'g');
+                const matches = fileText.match(importNameRegex) || [];
+                
+                // The first match is the import declaration itself
+                // If there's only 1 or fewer occurrences, it's unused
+                if (matches.length <= 1) {
+                  unusedImports.push(importName);
+                }
+              }
+            } catch (error) {
+              // Skip this namespace import if there's an error
+              if (this.options.verbose) {
+                Logger.info(`Error processing namespace import in ${sourceFile.getFilePath()}`);
+              }
+            }
+            
+          } catch (error) {
             // Skip this import declaration if there's an error
             if (this.options.verbose) {
               Logger.info(`Error processing import declaration in ${sourceFile.getFilePath()}`);
@@ -172,7 +202,7 @@ export class Cleaner {
             imports: unusedImports,
           });
         }
-      } catch {
+      } catch (error) {
         // Skip this file if there's an error processing it
         Logger.info(`Skipping import analysis for file due to error: ${sourceFile.getFilePath()}`);
         continue;
@@ -181,7 +211,14 @@ export class Cleaner {
 
     return result;
   }
-
+  
+  /**
+   * Escape special characters for use in a regular expression
+   */
+  private escapeRegExp(string: string): string {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  }
+  
   /**
    * Finds unused variables in the codebase
    */
@@ -516,14 +553,24 @@ export class Cleaner {
   private isFileProtected(filePath: string): boolean {
     const fileName = path.basename(filePath).toLowerCase();
     const fileExt = path.extname(filePath).toLowerCase();
+    const dirName = path.dirname(filePath);
     
-    // Skip test files
-    if (fileName.includes('.test.') || fileName.includes('.spec.')) {
+    // Skip test files - more comprehensive check
+    if (fileName.includes('.test.') || 
+        fileName.includes('.spec.') || 
+        fileName.includes('jest.') || 
+        fileName.includes('test-') || 
+        dirName.includes('/test') || 
+        dirName.includes('/tests') || 
+        dirName.includes('/__tests__') ||
+        dirName.includes('/__mocks__') ||
+        dirName.includes('/fixtures') ||
+        dirName.includes('/mocks')) {
       return true;
     }
     
-    // Skip declaration files
-    if (fileExt === '.d.ts') {
+    // Skip TypeScript declaration files (.d.ts)
+    if (fileName.endsWith('.d.ts') || fileExt === '.d.ts') {
       return true;
     }
     
@@ -535,16 +582,32 @@ export class Cleaner {
         fileName === '.prettierrc' ||
         fileName.startsWith('.') ||
         fileName.endsWith('rc') ||
-        fileName.endsWith('rc.js')) {
+        fileName.endsWith('rc.js') ||
+        fileName.endsWith('rc.json')) {
       return true;
     }
     
-    // Skip files in special directories
+    // Skip documentation files
+    if (fileExt === '.md' || 
+        fileExt === '.mdx' ||
+        fileName === 'license' ||
+        fileName === 'changelog' ||
+        fileName === 'contributing') {
+      return true;
+    }
+    
+    // Skip files in special directories (including nested ones)
     const relativePath = path.relative(this.targetDir, filePath).toLowerCase();
     if (relativePath.startsWith('node_modules') || 
         relativePath.startsWith('dist') || 
         relativePath.startsWith('build') || 
-        relativePath.startsWith('.git')) {
+        relativePath.startsWith('.git') ||
+        relativePath.includes('/docs/') ||
+        relativePath.includes('/examples/') ||
+        relativePath.includes('/scripts/') ||
+        relativePath.endsWith('/docs') ||
+        relativePath.endsWith('/examples') ||
+        relativePath.endsWith('/scripts')) {
       return true;
     }
     

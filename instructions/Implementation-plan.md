@@ -44,11 +44,11 @@
   - [x] Add specific CLI flag (`--delete-unused-files`)
   - [x] Add interactive prompt with colorful warning
 
-- [ ] **CSS/Style Cleaner**
-  - [ ] Scan and analyze CSS/SCSS/LESS files
-  - [ ] Identify unused classes, selectors, and styles
-  - [ ] Prune unused styles from stylesheets
-  - [ ] Handle both standalone and component-level styles
+- [x] **CSS/Style Cleaner**
+  - [x] Scan and analyze CSS/SCSS/LESS files
+  - [x] Identify unused classes, selectors, and styles
+  - [x] Prune unused styles from stylesheets
+  - [x] Handle both standalone and component-level styles
   
 **Deliverables:** Working cleanup modules with dry-run capability
 

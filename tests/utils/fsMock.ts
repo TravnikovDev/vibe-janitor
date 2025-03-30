@@ -35,9 +35,7 @@ export class FsMock {
 
     // Use type assertions to mock fs methods
     // This ensures TypeScript doesn't complain about read-only properties
-    const mockReadFile = jest
-      .fn()
-      .mockImplementation((path: PathLike, options: any, callback?: any) => {
+    const mockReadFile = jest.fn().mockImplementation((path: PathLike, options: any, callback?: any) => {
         if (!callback && typeof options === 'function') {
           callback = options;
           options = 'utf8';

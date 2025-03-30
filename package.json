@@ -13,8 +13,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"**/*.ts\"",
     "start": "node dist/cli/index.js",
@@ -51,15 +51,18 @@
   "dependencies": {
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
+    "css-tree": "^2.3.1",
     "depcheck": "^1.4.7",
     "fast-glob": "^3.3.3",
     "fs-extra": "^11.3.0",
     "madge": "^8.0.0",
+    "postcss": "^8.5.3",
     "prompts": "^2.4.2",
     "ts-morph": "^25.0.1",
     "typescript": "^5.8.2"
   },
   "devDependencies": {
+    "@types/css-tree": "^2.3.6",
     "@types/fs-extra": "^11.0.4",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.14",

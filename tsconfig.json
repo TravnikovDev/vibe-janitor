@@ -10,7 +10,8 @@
     "outDir": "dist",
     "rootDir": ".",
     "declaration": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
   "include": ["cli/**/*", "core/**/*", "utils/**/*", "tests/**/*", "types/**/*"],
   "exclude": ["node_modules", "dist"]

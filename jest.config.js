@@ -1,5 +1,5 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-module.exports = {
+export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['**/*.test.ts'],
@@ -11,4 +11,14 @@ module.exports = {
     '!**/node_modules/**',
     '!**/dist/**',
   ],
+  transform: {
+    '^.+\\.ts$': ['ts-jest', { useESM: true }]
+  },
+  extensionsToTreatAsEsm: ['.ts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(chalk|ansi-styles|#ansi-styles|css-tree|supports-color|string-width|strip-ansi|eastasianwidth|emoji-regex)/)'
+  ]
 };
