@@ -1,26 +1,25 @@
 # vibe-janitor 🧹
 
-<table border="0" cellspacing="0" cellpadding="0">
-  <tr>
-    <td width="30%" align="center" style="border: 0">
-      <img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" alt="vibe-janitor mascot" width="100%">
-    </td>
-    <td width="70%" style="border: 0">
-      <p>
-        <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
-        <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
-        <img src="https://img.shields.io/github/license/TravnikovDev/vibe-janitor.svg" alt="license">
-      </p>
-      <p>
-        <b>Clean up AI-generated JavaScript/TypeScript projects efficiently and intelligently</b>
-      </p>
-      <h2>🌟 Overview</h2>
-      <p>
-      AI tools like GitHub Copilot, ChatGPT, or Claude often generate code with unused imports, variables, functions, and assets. **vibe-janitor** automatically identifies and removes these unwanted artifacts, making your codebase cleaner and more efficient.
-      </p>
-    </td>
-  </tr>
-</table>
+<div align="center">
+  <div>
+    <img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" alt="vibe-janitor mascot" width="30%" style="background: white; border-radius: 36px; padding: 15px;">
+  </div>
+
+  <div>
+    <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
+    <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
+    <img src="https://img.shields.io/github/license/TravnikovDev/vibe-janitor.svg" alt="license">
+  </div>
+
+  <h2>Clean up AI-generated JavaScript/TypeScript projects efficiently and intelligently</h2>
+</div>
+
+<div>
+  <h2>🌟 Overview</h2>
+  <p>
+  AI tools like GitHub Copilot, ChatGPT, or Claude often generate code with unused imports, variables, functions, and assets. <strong>vibe-janitor</strong> automatically identifies and removes these unwanted artifacts, making your codebase cleaner and more efficient.
+  </p>
+</div>
 
 ## ✨ Features
 
