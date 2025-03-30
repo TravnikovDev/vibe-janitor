@@ -52,29 +52,13 @@ const SPECIAL_DEPENDENCIES = {
   // Framework plugins
   frameworkPlugins: {
     // Gatsby plugins are typically used in gatsby-config.js
-    gatsby: [
-      /^gatsby-plugin-/,
-      /^gatsby-source-/,
-      /^gatsby-transformer-/
-    ],
+    gatsby: [/^gatsby-plugin-/, /^gatsby-source-/, /^gatsby-transformer-/],
     // Next.js plugins
-    next: [
-      /^next-/,
-      '@next/bundle-analyzer',
-      '@next/mdx',
-      'next-seo',
-      'next-themes'
-    ],
+    next: [/^next-/, '@next/bundle-analyzer', '@next/mdx', 'next-seo', 'next-themes'],
     // Astro plugins
-    astro: [
-      /^@astrojs\//,
-      /^astro-/
-    ],
+    astro: [/^@astrojs\//, /^astro-/],
     // Nuxt modules
-    nuxt: [
-      /^@nuxtjs\//,
-      /^nuxt-/
-    ]
+    nuxt: [/^@nuxtjs\//, /^nuxt-/],
   },
 
   // Testing libraries are used in test files
@@ -99,13 +83,11 @@ const SPECIAL_DEPENDENCIES = {
     'ava',
     'supertest',
     'mock-service-worker',
-    '@mswjs/data'
+    '@mswjs/data',
   ],
 
   // Type definitions are used implicitly
-  typeDefinitions: [
-    /^@types\//
-  ],
+  typeDefinitions: [/^@types\//],
 
   // Build tools and compilers
   buildTools: [
@@ -130,7 +112,7 @@ const SPECIAL_DEPENDENCIES = {
     /babel-/,
     'swc',
     '@swc/',
-    'typescript'
+    'typescript',
   ],
 
   // CSS and styling tools
@@ -149,9 +131,9 @@ const SPECIAL_DEPENDENCIES = {
     'css-loader',
     'style-loader',
     'css-modules',
-    'cssnano'
+    'cssnano',
   ],
-  
+
   // Linters and formatters
   lintingTools: [
     'eslint',
@@ -164,7 +146,7 @@ const SPECIAL_DEPENDENCIES = {
     /stylelint-/,
     'commitlint',
     /commitlint-/,
-    '@commitlint/'
+    '@commitlint/',
   ],
 
   // Documentation tools
@@ -176,18 +158,11 @@ const SPECIAL_DEPENDENCIES = {
     'storybook',
     '@storybook/',
     'swagger',
-    'openapi'
+    'openapi',
   ],
 
   // Monorepo tools
-  monorepoTools: [
-    'lerna',
-    'nx',
-    '@nrwl/',
-    'turborepo',
-    'turbo',
-    'workspaces'
-  ],
+  monorepoTools: ['lerna', 'nx', '@nrwl/', 'turborepo', 'turbo', 'workspaces'],
 
   // Config and env management
   configTools: [
@@ -198,7 +173,7 @@ const SPECIAL_DEPENDENCIES = {
     'config',
     'convict',
     'rc',
-    'cosmiconfig'
+    'cosmiconfig',
   ],
 
   // Git and versioning tools
@@ -209,7 +184,7 @@ const SPECIAL_DEPENDENCIES = {
     'cz-conventional-changelog',
     'standard-version',
     'semantic-release',
-    '@semantic-release/'
+    '@semantic-release/',
   ],
 
   // Common utilities often used in config files
@@ -235,8 +210,8 @@ const SPECIAL_DEPENDENCIES = {
     '@apollo/',
     'urql',
     'react-query',
-    '@tanstack/react-query'
-  ]
+    '@tanstack/react-query',
+  ],
 };
 
 /**
@@ -283,7 +258,7 @@ export class DependencyAuditor {
       SPECIAL_DEPENDENCIES.monorepoTools,
       SPECIAL_DEPENDENCIES.configTools,
       SPECIAL_DEPENDENCIES.gitTools,
-      SPECIAL_DEPENDENCIES.utilityDependencies
+      SPECIAL_DEPENDENCIES.utilityDependencies,
     ];
 
     for (const category of categoriesToCheck) {
@@ -296,7 +271,7 @@ export class DependencyAuditor {
     for (const [framework, patterns] of Object.entries(SPECIAL_DEPENDENCIES.frameworkPlugins)) {
       // Skip Gatsby if not a Gatsby project (already checked above)
       if (framework === 'gatsby' && this.options.isGatsbyProject) continue;
-      
+
       if (this.matchesPattern(packageName, patterns)) {
         return true;
       }
@@ -325,54 +300,57 @@ export class DependencyAuditor {
    */
   private async detectFrameworks(): Promise<void> {
     if (!this.options.detectFrameworks) return;
-    
+
     const packageJsonPath = path.join(this.targetDir, 'package.json');
     if (!fs.existsSync(packageJsonPath)) return;
 
     try {
       const packageJson = await fs.readJson(packageJsonPath);
-      const dependencies = {...(packageJson.dependencies || {}), ...(packageJson.devDependencies || {})};
-      
+      const dependencies = {
+        ...(packageJson.dependencies || {}),
+        ...(packageJson.devDependencies || {}),
+      };
+
       // Detect Gatsby
       if ('gatsby' in dependencies) {
-        const hasGatsbyConfig = 
+        const hasGatsbyConfig =
           fs.existsSync(path.join(this.targetDir, 'gatsby-config.js')) ||
           fs.existsSync(path.join(this.targetDir, 'gatsby-config.ts'));
-        
+
         this.options.isGatsbyProject = hasGatsbyConfig;
       }
-      
+
       // Detect Next.js
       if ('next' in dependencies) {
-        const hasNextConfig = 
+        const hasNextConfig =
           fs.existsSync(path.join(this.targetDir, 'next.config.js')) ||
           fs.existsSync(path.join(this.targetDir, 'next.config.ts')) ||
           fs.existsSync(path.join(this.targetDir, 'next.config.mjs'));
-        
+
         this.options.isNextProject = hasNextConfig;
       }
-      
+
       // Detect Nuxt.js
       if ('nuxt' in dependencies || 'nuxt3' in dependencies) {
-        const hasNuxtConfig = 
+        const hasNuxtConfig =
           fs.existsSync(path.join(this.targetDir, 'nuxt.config.js')) ||
           fs.existsSync(path.join(this.targetDir, 'nuxt.config.ts'));
-        
+
         this.options.isNuxtProject = hasNuxtConfig;
       }
-      
+
       // Detect Astro
       if ('astro' in dependencies) {
-        const hasAstroConfig = 
+        const hasAstroConfig =
           fs.existsSync(path.join(this.targetDir, 'astro.config.js')) ||
           fs.existsSync(path.join(this.targetDir, 'astro.config.ts')) ||
           fs.existsSync(path.join(this.targetDir, 'astro.config.mjs'));
-        
+
         this.options.isAstroProject = hasAstroConfig;
       }
-      
+
       // Detect if it's a monorepo
-      this.options.isMonorepo = (
+      this.options.isMonorepo =
         'lerna' in dependencies ||
         'nx' in dependencies ||
         '@nrwl/workspace' in dependencies ||
@@ -381,9 +359,8 @@ export class DependencyAuditor {
         fs.existsSync(path.join(this.targetDir, 'nx.json')) ||
         fs.existsSync(path.join(this.targetDir, 'turbo.json')) ||
         fs.existsSync(path.join(this.targetDir, 'pnpm-workspace.yaml')) ||
-        (packageJson.workspaces !== undefined)
-      );
-      
+        packageJson.workspaces !== undefined;
+
       // Detect common config files that indicate certain tools are in use
       const configFiles = {
         'postcss.config.js': 'postcss',
@@ -402,22 +379,23 @@ export class DependencyAuditor {
         'webpack.config.js': 'webpack',
         'rollup.config.js': 'rollup',
         'vite.config.js': 'vite',
-        'tsconfig.json': 'typescript'
+        'tsconfig.json': 'typescript',
       };
-      
+
       for (const [file, tool] of Object.entries(configFiles)) {
-        if (fs.existsSync(path.join(this.targetDir, file)) && !this.options.ignoreMatches?.includes(tool)) {
+        if (
+          fs.existsSync(path.join(this.targetDir, file)) &&
+          !this.options.ignoreMatches?.includes(tool)
+        ) {
           // If we find a config file for a tool, ensure it's not considered unused
-          this.options.ignoreMatches = [
-            ...(this.options.ignoreMatches || []),
-            tool
-          ];
+          this.options.ignoreMatches = [...(this.options.ignoreMatches || []), tool];
         }
       }
-      
     } catch (error) {
       if (this.options.verbose) {
-        Logger.warn(`Error detecting project frameworks: ${error instanceof Error ? error.message : String(error)}`);
+        Logger.warn(
+          `Error detecting project frameworks: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     }
   }
@@ -447,7 +425,7 @@ export class DependencyAuditor {
 
       // Auto-detect frameworks and project structure
       await this.detectFrameworks();
-      
+
       if (this.options.verbose) {
         if (this.options.isGatsbyProject) {
           Logger.info('Detected Gatsby project. Will handle Gatsby plugins specially.');
@@ -471,16 +449,12 @@ export class DependencyAuditor {
         ignoreDirs: this.options.ignoreDirs,
         ignoreMatches: this.options.ignoreMatches,
         // Include test pattern to better detect test dependencies
-        specials: [
-          depcheck.special.jest,
-          depcheck.special.bin,
-          depcheck.special.eslint
-        ],
+        specials: [depcheck.special.jest, depcheck.special.bin, depcheck.special.eslint],
         // Check more file types
         detectors: [
           depcheck.detector.requireCallExpression,
           depcheck.detector.importDeclaration,
-          depcheck.detector.exportDeclaration
+          depcheck.detector.exportDeclaration,
         ],
       };
 
@@ -490,68 +464,77 @@ export class DependencyAuditor {
       let unusedDependencies = [...results.dependencies, ...results.devDependencies];
 
       // Filter out special dependencies that are likely used but not detected
-      unusedDependencies = unusedDependencies.filter(dep => !this.isSpecialDependency(dep));
+      unusedDependencies = unusedDependencies.filter((dep) => !this.isSpecialDependency(dep));
 
       // Check for dependencies in config files based on project type
       try {
         const configFilesToCheck = [];
-        
+
         // Add framework-specific config files
         if (this.options.isGatsbyProject) {
           configFilesToCheck.push(
-            'gatsby-config.js', 'gatsby-config.ts',
-            'gatsby-node.js', 'gatsby-node.ts',
-            'gatsby-browser.js', 'gatsby-browser.ts',
-            'gatsby-ssr.js', 'gatsby-ssr.ts'
+            'gatsby-config.js',
+            'gatsby-config.ts',
+            'gatsby-node.js',
+            'gatsby-node.ts',
+            'gatsby-browser.js',
+            'gatsby-browser.ts',
+            'gatsby-ssr.js',
+            'gatsby-ssr.ts'
           );
         }
-        
+
         if (this.options.isNextProject) {
-          configFilesToCheck.push(
-            'next.config.js', 'next.config.ts', 'next.config.mjs'
-          );
+          configFilesToCheck.push('next.config.js', 'next.config.ts', 'next.config.mjs');
         }
-        
+
         if (this.options.isNuxtProject) {
-          configFilesToCheck.push(
-            'nuxt.config.js', 'nuxt.config.ts'
-          );
+          configFilesToCheck.push('nuxt.config.js', 'nuxt.config.ts');
         }
-        
+
         if (this.options.isAstroProject) {
-          configFilesToCheck.push(
-            'astro.config.js', 'astro.config.ts', 'astro.config.mjs'
-          );
+          configFilesToCheck.push('astro.config.js', 'astro.config.ts', 'astro.config.mjs');
         }
-        
+
         // Add common config files that might reference dependencies
         configFilesToCheck.push(
           // Build tools
-          'webpack.config.js', 'rollup.config.js', 'vite.config.js', 'vite.config.ts',
+          'webpack.config.js',
+          'rollup.config.js',
+          'vite.config.js',
+          'vite.config.ts',
           // Linting and formatting
-          '.eslintrc.js', '.eslintrc.json', '.prettierrc.js',
+          '.eslintrc.js',
+          '.eslintrc.json',
+          '.prettierrc.js',
           // Testing
-          'jest.config.js', 'cypress.config.js', 'playwright.config.js', 'vitest.config.js',
+          'jest.config.js',
+          'cypress.config.js',
+          'playwright.config.js',
+          'vitest.config.js',
           // Documentation
           '.storybook/main.js',
           // Styling
-          'postcss.config.js', 'tailwind.config.js',
+          'postcss.config.js',
+          'tailwind.config.js',
           // Monorepo
-          'lerna.json', 'nx.json', 'turbo.json'
+          'lerna.json',
+          'nx.json',
+          'turbo.json'
         );
-        
+
         // Read and check all config files for references to dependencies
         for (const configFile of configFilesToCheck) {
           const configPath = path.join(this.targetDir, configFile);
           if (fs.existsSync(configPath)) {
             const configContent = await fs.readFile(configPath, 'utf-8');
-            
+
             // Filter out any dependency that is mentioned in the config file
             // This simple string-based approach isn't perfect but catches most cases
-            unusedDependencies = unusedDependencies.filter(dep => {
+            unusedDependencies = unusedDependencies.filter((dep) => {
               // Check if the dependency is mentioned in quotes (single or double)
-              const isReferenced = 
-                configContent.includes(`'${dep}'`) || 
+              const isReferenced =
+                configContent.includes(`'${dep}'`) ||
                 configContent.includes(`"${dep}"`) ||
                 configContent.includes(`from '${dep}'`) ||
                 configContent.includes(`from "${dep}"`) ||
@@ -559,12 +542,12 @@ export class DependencyAuditor {
                 configContent.includes(`require("${dep}")`) ||
                 configContent.includes(`import '${dep}'`) ||
                 configContent.includes(`import "${dep}"`);
-                
+
               return !isReferenced;
             });
           }
         }
-        
+
         // For monorepos, check workspace packages references
         if (this.options.isMonorepo) {
           const packageJsonPath = path.join(this.targetDir, 'package.json');
@@ -572,7 +555,7 @@ export class DependencyAuditor {
             const packageJson = await fs.readJson(packageJsonPath);
             if (packageJson.workspaces) {
               // Filter out any workspace packages (often start with @ or match workspace patterns)
-              unusedDependencies = unusedDependencies.filter(dep => {
+              unusedDependencies = unusedDependencies.filter((dep) => {
                 // If it's a workspace local package reference, keep it
                 if (dep.startsWith('@') && dep.includes('/')) {
                   // This might be a workspace package (e.g., @myorg/package)
@@ -585,7 +568,9 @@ export class DependencyAuditor {
         }
       } catch (error) {
         if (this.options.verbose) {
-          Logger.warn(`Error checking config files: ${error instanceof Error ? error.message : String(error)}`);
+          Logger.warn(
+            `Error checking config files: ${error instanceof Error ? error.message : String(error)}`
+          );
         }
       }
 
@@ -653,8 +638,9 @@ export class DependencyAuditor {
       instructions += '```bash\n';
       instructions += `npm uninstall ${results.unusedDependencies.join(' ')}\n`;
       instructions += '```\n\n';
-      
-      instructions += '**Note:** Some dependencies might be used in ways that automated tools cannot detect. ';
+
+      instructions +=
+        '**Note:** Some dependencies might be used in ways that automated tools cannot detect. ';
       instructions += 'Please verify each dependency before removing it.\n\n';
     }
 

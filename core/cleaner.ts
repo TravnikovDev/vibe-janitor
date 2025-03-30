@@ -451,11 +451,11 @@ export class Cleaner {
     // First, collect all files referenced by imports
     for (const sourceFile of sourceFiles) {
       const sourceFilePath = sourceFile.getFilePath();
-      
+
       // Skip imports from test files when determining used components
       const fileName = path.basename(sourceFilePath).toLowerCase();
       const dirName = path.dirname(sourceFilePath);
-      const isTestFile = 
+      const isTestFile =
         fileName.includes('test.') ||
         fileName.includes('spec.') ||
         fileName.includes('jest.') ||
@@ -466,7 +466,7 @@ export class Cleaner {
         dirName.includes('/__mocks__') ||
         dirName.includes('/fixtures') ||
         dirName.includes('/mocks');
-          
+
       // If this is a test file and we're in deep scrub mode with deleteUnusedFiles,
       // don't count its imports as references
       if (isTestFile && this.options.deepScrub && this.options.deleteUnusedFiles) {
@@ -475,7 +475,7 @@ export class Cleaner {
         }
         continue;
       }
-      
+
       const importDeclarations = sourceFile.getImportDeclarations();
 
       for (const importDecl of importDeclarations) {
@@ -673,7 +673,11 @@ export class Cleaner {
     for (const dir of specialDirs) {
       // Check both for directory parts and paths that contain the directory name
       // This ensures we protect things like /static/, /static-assets/, etc.
-      if (dirParts.includes(dir) || normalizedPath.includes(`/${dir}/`) || normalizedPath.startsWith(`${dir}/`)) {
+      if (
+        dirParts.includes(dir) ||
+        normalizedPath.includes(`/${dir}/`) ||
+        normalizedPath.startsWith(`${dir}/`)
+      ) {
         return true;
       }
     }
@@ -712,7 +716,7 @@ export class Cleaner {
     ) {
       return true;
     }
-    
+
     // Additional check for common static assets like favicon
     if (
       fileName === 'favicon.ico' ||
@@ -913,7 +917,11 @@ export class Cleaner {
             Logger.success(
               `Deleted ${result.deletedFiles.length} unused files (${this.formatSize(result.unusedFilesSize)})`
             );
-          } else if (result.unusedFiles.length > 0 && result.deletedFiles.length === 0 && this.options.verbose) {
+          } else if (
+            result.unusedFiles.length > 0 &&
+            result.deletedFiles.length === 0 &&
+            this.options.verbose
+          ) {
             Logger.info(
               `Found ${result.unusedFiles.length} potential unused files, but all were protected from deletion`
             );
