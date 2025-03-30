@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-// Analyzer is mocked in this test
 
 describe('Analyzer Module', () => {
   let testDir: string;

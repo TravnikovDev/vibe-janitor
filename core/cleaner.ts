@@ -70,7 +70,7 @@ export class Cleaner {
    */
   private async addFilesToProject(): Promise<void> {
     const filePatterns = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'];
-    const ignorePatterns = ['**/node_modules/**', '**/dist/**', '**/build/**', '**/*.d.ts'];
+    const ignorePatterns = ['**/node_modules/**', '**/dist/**', '**/build/**', '**/*.d.ts', '**/public/**'];
 
     try {
       const files = await glob(filePatterns, {
@@ -617,11 +617,33 @@ export class Cleaner {
     const dirParts = normalizedPath.split('/');
 
     // Check for special directories anywhere in the path
-    const specialDirs = ['node_modules', 'dist', 'build', '.git', 'docs', 'examples', 'scripts'];
+    const specialDirs = [
+      'node_modules', 'dist', 'build', '.git', 'docs', 'examples', 'scripts', 
+      'public', 'static', '.next', '.nuxt', '.output', 'out', '.vercel'
+    ];
     for (const dir of specialDirs) {
       if (dirParts.includes(dir)) {
         return true;
       }
+    }
+
+    // Protect framework-specific directories and files
+    const frameworkPatterns = [
+      '/pages/', '/src/pages/', // Next.js pages
+      '/components/', '/src/components/', // Common component folders
+      '/layouts/', '/src/layouts/', // Layout folders
+      '/api/', '/src/api/', // API routes
+      '/app/', '/src/app/', // Next.js App Router
+      '/routes/', '/src/routes/' // React Router / other frameworks
+    ];
+    
+    if (frameworkPatterns.some(pattern => normalizedPath.includes(pattern))) {
+      return true;
+    }
+
+    // Protect files in the root directory - they're often configuration
+    if (path.dirname(filePath) === this.targetDir) {
+      return true;
     }
 
     // Also check using the relative path approach as a fallback
@@ -631,9 +653,13 @@ export class Cleaner {
       relativePath.startsWith('dist') ||
       relativePath.startsWith('build') ||
       relativePath.startsWith('.git') ||
+      relativePath.startsWith('public') ||
+      relativePath.startsWith('static') ||
       relativePath.includes('/docs') ||
       relativePath.includes('/examples') ||
-      relativePath.includes('/scripts')
+      relativePath.includes('/scripts') ||
+      relativePath.includes('/public') ||
+      relativePath.includes('/static')
     ) {
       return true;
     }

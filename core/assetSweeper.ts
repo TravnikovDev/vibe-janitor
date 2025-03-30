@@ -76,6 +76,7 @@ export class AssetSweeper {
       '**/build/**',
       '**/coverage/**',
       '**/.git/**',
+      '**/public/**',
     ];
 
     if (this.options.verbose) {
@@ -117,6 +118,7 @@ export class AssetSweeper {
       '**/build/**',
       '**/coverage/**',
       '**/.git/**',
+      '**/public/**',
     ];
 
     if (this.options.verbose) {
