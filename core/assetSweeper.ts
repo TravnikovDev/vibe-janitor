@@ -77,6 +77,13 @@ export class AssetSweeper {
       '**/coverage/**',
       '**/.git/**',
       '**/public/**',
+      '**/static/**',
+      '**/assets/**',
+      '**/vendor/**',
+      '**/out/**',
+      '**/tmp/**',
+      '**/temp/**',
+      '**/cache/**',
     ];
 
     if (this.options.verbose) {
