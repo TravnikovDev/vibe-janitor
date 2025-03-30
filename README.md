@@ -1,18 +1,22 @@
 # vibe-janitor 🧹
 
-<p align="center">
-  <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
-  <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
-  <img src="https://img.shields.io/github/license/TravnikovDev/vibe-janitor.svg" alt="license">
-</p>
-
-<p align="center">
-  <b>Clean up AI-generated JavaScript/TypeScript projects efficiently and intelligently</b>
-</p>
-
-<p align="center">
-  <img width="600" src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/docs/vibe-janitor-banner.png" alt="vibe-janitor banner">
-</p>
+<table>
+  <tr>
+    <td width="30%" align="center" style="border: none">
+      <img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" alt="vibe-janitor mascot" width="100%">
+    </td>
+    <td width="70%" style="border: none">
+      <p>
+        <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
+        <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
+        <img src="https://img.shields.io/github/license/TravnikovDev/vibe-janitor.svg" alt="license">
+      </p>
+      <p>
+        <b>Clean up AI-generated JavaScript/TypeScript projects efficiently and intelligently</b>
+      </p>
+    </td>
+  </tr>
+</table>
 
 ## 🌟 Overview
 
@@ -173,4 +177,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - The TypeScript team for the TS Compiler API
 - ts-morph for making AST manipulation easier
 - depcheck for dependency analysis
-

@@ -596,7 +596,19 @@ export class Cleaner {
     const fileName = path.basename(filePath).toLowerCase();
     const fileExt = path.extname(filePath).toLowerCase();
     const dirName = path.dirname(filePath);
-
+    
+    // First check: Absolute protection for static directory and files
+    // Directly check if the path contains '/static/' to protect all files in static directories
+    if (
+      filePath.includes('/static/') || 
+      filePath.includes('\\static\\') || 
+      filePath.includes('/public/') || 
+      filePath.includes('\\public\\') ||
+      /[\/\\]static$/.test(dirName)
+    ) {
+      return true;
+    }
+    
     // Protect global.css files
     if (fileName === 'global.css') {
       return true;
