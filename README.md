@@ -1,17 +1,11 @@
-<style>
-td, th {
-   border: none!important;
-}
-</style>
-
 # vibe-janitor 🧹
 
 <table border="0" cellspacing="0" cellpadding="0">
   <tr>
-    <td width="30%" align="center">
+    <td width="30%" align="center" style="border: 0">
       <img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" alt="vibe-janitor mascot" width="100%">
     </td>
-    <td width="70%">
+    <td width="70%" style="border: 0">
       <p>
         <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
         <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
