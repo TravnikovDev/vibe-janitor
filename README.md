@@ -1,25 +1,25 @@
 # vibe-janitor 🧹
 
-<div align="center">
-<img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" align="left" height="480" width="220" alt="vibe-janitor mascot"  style="margin-right:16px">
-
-<p align="left">
-  <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
-  <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
-  <img src="https://img.shields.io/github/license/TravnikovDev/vibe-janitor.svg" alt="license">
-</p>
-
-<h3 align="left"><b>Keep your vibe-coded JavaScript/TypeScript projects clean and smart</b></h3>
-
-<h3 align="left">🌟 Overview</h3>
-
-<p align="left">
-When you build with tools like ChatGPT, GitHub Copilot, Claude, Cursor IDE, or Windsurf AI: LLMs can't see your whole project at once. Because of their limited context window, they might read and modify irrelevant or unused code—especially leftovers from past experiments.
-<br><br>
-This not only creates bugs but also wastes your time and money. <strong>vibe-janitor</strong> helps you stay in control. It automatically finds and removes unused imports, variables, functions, files, and dependencies—so your codebase stays clean, minimal, and AI-friendly.
-<br><br>
-If you're into prompt-based development, conversational coding, or just vibing with AI—this tool has your back.
-</p>
+<div align="center" style="display: flex; align-items: center;">
+  <div style="flex: 0 0 auto;">
+    <img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" height="540" width="220" alt="vibe-janitor mascot">
+  </div>
+  <div style="flex: 1; padding-left: 20px;">
+    <p>
+      <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
+      <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
+      <img src="https://img.shields.io/github/license/TravnikovDev/vibe-janitor.svg" alt="license">
+    </p>
+    <h3 align="left"><b>Keep your vibe-coded JavaScript/TypeScript projects clean and smart</b></h3>
+    <h3 align="left">🌟 Overview</h3>
+    <p align="left">
+      When you build with tools like ChatGPT, GitHub Copilot, Claude, Cursor IDE, or Windsurf AI: LLMs can't see your whole project at once. Because of their limited context window, they might read and modify irrelevant or unused code—especially leftovers from past experiments.
+      <br><br>
+      This not only creates bugs but also wastes your time and money. <strong>vibe-janitor</strong> helps you stay in control. It automatically finds and removes unused imports, variables, functions, files, and dependencies—so your codebase stays clean, minimal, and AI-friendly.
+      <br><br>
+      If you're into prompt-based development, conversational coding, or just vibing with AI—this tool has your back.
+    </p>
+  </div>
 </div>
 
 <br clear="all">
@@ -35,11 +35,6 @@ If you're into prompt-based development, conversational coding, or just vibing w
 
 ## 🚀 Installation
 
-### Global Installation
-
-```bash
-npm install -g vibe-janitor
-```
 
 ### Local Project Installation
 
@@ -66,8 +61,10 @@ npx vibe-janitor
 This will prompt you with questions to configure the cleanup process:
 - Clean up unused imports and code automatically? (Y/n)
 - Show detailed information about issues found? (Y/n)
-- Generate detailed reports? (y/N)
-- Run advanced cleanup for assets, variables, and functions? (y/N)
+- Generate detailed reports (JSON and Markdown)? (y/N)
+- Run advanced cleanup (assets, variables, functions)? (y/N)
+- Clean unused CSS classes and selectors? (y/N)
+- Delete files that are not imported or used anywhere? (y/N)
 - Analyze package dependencies? (y/N)
 - Check for circular dependencies? (y/N)
 
