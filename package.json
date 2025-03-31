@@ -1,6 +1,6 @@
 {
   "name": "vibe-janitor",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A CLI tool that cleans AI-generated JavaScript/TypeScript projects efficiently and intelligently",
   "main": "dist/cli/index.js",
   "type": "module",
