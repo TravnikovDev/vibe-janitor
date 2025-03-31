@@ -98,6 +98,10 @@ export class StyleCleaner {
       '**/build/**',
       '**/coverage/**',
       '**/.git/**',
+      '**/public/**',
+      '**/static/**',
+      '**/assets/**',
+      '**/global.css',
     ];
 
     if (this.options.verbose) {
@@ -303,6 +307,15 @@ export class StyleCleaner {
     for (const entry of unusedSelectors) {
       try {
         const { file, selectors } = entry;
+        
+        // Skip protected files
+        if (this.isProtectedFile(file)) {
+          if (this.options.verbose) {
+            Logger.info(`Skipping protected file: ${file}`);
+          }
+          continue;
+        }
+        
         const content = await fs.readFile(file, 'utf8');
         const originalSize = content.length;
 
@@ -389,6 +402,29 @@ export class StyleCleaner {
     }
 
     return `${size.toFixed(1)} ${units[unitIndex]}`;
+  }
+
+  /**
+   * Check if a file is protected and should not be modified
+   */
+  private isProtectedFile(filePath: string): boolean {
+    const protectedPatterns = [
+      '**/global.css',
+      '**/public/**',
+      '**/static/**',
+      '**/assets/**'
+    ];
+    
+    // Check if the file path contains any of the protected patterns
+    for (const pattern of protectedPatterns) {
+      // Convert glob pattern to a simple string check
+      const simplePattern = pattern.replace(/\*\*\//g, '').replace(/\*/g, '');
+      if (filePath.includes(simplePattern)) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   /**

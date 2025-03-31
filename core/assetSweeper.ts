@@ -126,6 +126,8 @@ export class AssetSweeper {
       '**/coverage/**',
       '**/.git/**',
       '**/public/**',
+      '**/static/**',
+      '**/assets/**',
     ];
 
     if (this.options.verbose) {
@@ -293,6 +295,27 @@ export class AssetSweeper {
   }
 
   /**
+   * Check if an asset is protected and should not be deleted
+   */
+  private isProtectedAsset(assetPath: string): boolean {
+    const protectedPatterns = [
+      '**/static/**',
+      '**/public/**',
+      '**/assets/**',
+      '**/global.css',
+    ];
+    
+    // Check if the path contains any of the protected directories
+    for (const pattern of protectedPatterns) {
+      if (assetPath.includes(pattern.replace(/\*/g, ''))) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  /**
    * Delete unused assets if configured to do so
    */
   private async deleteUnusedAssets(result: AssetSweepResult): Promise<void> {
@@ -308,6 +331,14 @@ export class AssetSweeper {
 
     for (const assetPath of allUnused) {
       try {
+        // Skip protected assets
+        if (this.isProtectedAsset(assetPath)) {
+          if (this.options.verbose) {
+            Logger.info(`Skipping protected asset: ${assetPath}`);
+          }
+          continue;
+        }
+        
         await fs.remove(assetPath);
         result.deletedAssets.push(assetPath);
 
