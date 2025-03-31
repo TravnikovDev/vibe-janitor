@@ -1,7 +1,7 @@
 # vibe-janitor 🧹
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" align="left" height="540" width="220" alt="vibe-janitor mascot"  style="margin-left: 20px">
+<img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" align="left" height="480" width="220" alt="vibe-janitor mascot"  style="margin-left: 20px">
 
 <p align="left">
   <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
