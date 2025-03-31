@@ -307,7 +307,7 @@ export class StyleCleaner {
     for (const entry of unusedSelectors) {
       try {
         const { file, selectors } = entry;
-        
+
         // Skip protected files
         if (this.isProtectedFile(file)) {
           if (this.options.verbose) {
@@ -315,7 +315,7 @@ export class StyleCleaner {
           }
           continue;
         }
-        
+
         const content = await fs.readFile(file, 'utf8');
         const originalSize = content.length;
 
@@ -408,13 +408,8 @@ export class StyleCleaner {
    * Check if a file is protected and should not be modified
    */
   private isProtectedFile(filePath: string): boolean {
-    const protectedPatterns = [
-      '**/global.css',
-      '**/public/**',
-      '**/static/**',
-      '**/assets/**'
-    ];
-    
+    const protectedPatterns = ['**/global.css', '**/public/**', '**/static/**', '**/assets/**'];
+
     // Check if the file path contains any of the protected patterns
     for (const pattern of protectedPatterns) {
       // Convert glob pattern to a simple string check
@@ -423,7 +418,7 @@ export class StyleCleaner {
         return true;
       }
     }
-    
+
     return false;
   }
 

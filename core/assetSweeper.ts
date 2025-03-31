@@ -298,20 +298,15 @@ export class AssetSweeper {
    * Check if an asset is protected and should not be deleted
    */
   private isProtectedAsset(assetPath: string): boolean {
-    const protectedPatterns = [
-      '**/static/**',
-      '**/public/**',
-      '**/assets/**',
-      '**/global.css',
-    ];
-    
+    const protectedPatterns = ['**/static/**', '**/public/**', '**/assets/**', '**/global.css'];
+
     // Check if the path contains any of the protected directories
     for (const pattern of protectedPatterns) {
       if (assetPath.includes(pattern.replace(/\*/g, ''))) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -338,7 +333,7 @@ export class AssetSweeper {
           }
           continue;
         }
-        
+
         await fs.remove(assetPath);
         result.deletedAssets.push(assetPath);
 
