@@ -1,34 +1,39 @@
 # vibe-janitor 🧹
 
 <div align="center">
-  <div>
-    <img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" alt="vibe-janitor mascot" width="30%" style="background: white; border-radius: 36px; padding: 15px;">
-  </div>
-
-  <div>
-    <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
-    <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
-    <img src="https://img.shields.io/github/license/TravnikovDev/vibe-janitor.svg" alt="license">
-  </div>
-
-  <h2>Clean up AI-generated JavaScript/TypeScript projects efficiently and intelligently</h2>
-</div>
-
-<div>
-  <h2>🌟 Overview</h2>
-  <p>
-  AI tools like GitHub Copilot, ChatGPT, or Claude often generate code with unused imports, variables, functions, and assets. <strong>vibe-janitor</strong> automatically identifies and removes these unwanted artifacts, making your codebase cleaner and more efficient.
-  </p>
+<table style="border: none; border-collapse: collapse; width: 100%; text-align: left;">
+  <tr style="border: none;">
+    <td align="center" width="33%" style="border: none; vertical-align: middle; padding: 20px;">
+      <img src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/static/vibe-janitor.svg" alt="vibe-janitor mascot" width="100%" style="background: white; border-radius: 36px; padding: 15px;">
+    </td>
+    <td width="66%" style="border: none; vertical-align: middle; padding-left: 20px;">
+      <p>
+        <img src="https://img.shields.io/npm/v/vibe-janitor.svg" alt="npm version">
+        <img src="https://img.shields.io/npm/dm/vibe-janitor.svg" alt="downloads">
+        <img src="https://img.shields.io/github/license/TravnikovDev/vibe-janitor.svg" alt="license">
+      </p>
+      <p>
+        <b>Keep your vibe-coded JavaScript/TypeScript projects clean and smart</b>
+      </p>
+      <h3>🌟 Overview</h3>
+      <p>
+      When you build with tools like ChatGPT, GitHub Copilot, Claude, Cursor IDE, or Windsurf AI: LLMs can't see your whole project at once. Because of their limited context window, they might read and modify irrelevant or unused code—especially leftovers from past experiments.
+    This not only creates bugs but also wastes your time and money. <strong>vibe-janitor</strong> helps you stay in control. It automatically finds and removes unused imports, variables, functions, files, and dependencies—so your codebase stays clean, minimal, and AI-friendly.
+  If you're into prompt-based development, conversational coding, or just vibing with AI—this tool has your back.
+      </p>
+    </td>
+  </tr>
+</table>
 </div>
 
 ## ✨ Features
 
-- **🧹 Unused Code Cleanup**: Detect and remove unused imports, variables, and functions
-- **🖼️ Asset Management**: Find and report unused static files (images, CSS, etc.)
-- **📊 Complexity Analysis**: Identify overly complex files, functions, and deeply nested code
-- **📦 Dependency Checking**: Discover unused packages and circular dependencies
-- **🔍 Dry Run Mode**: Preview changes without modifying files
-- **📝 Detailed Reports**: Get comprehensive reports of all cleaning activities
+- **🧹 Smart Code Cleanup**: Automatically detect and remove unused imports, variables, and functions left behind by AI tools like ChatGPT or Copilot. Keep only the code that actually matters.
+- **🖼️ Asset Scanner**: Finds forgotten static files (images, fonts, CSS, etc.) that are no longer used. Great after a few wild rounds of prompt-based design changes.
+- **📊 Complexity Analyzer**: Flags overly complex functions and deeply nested code—often the result of AI overthinking your prompts.
+- **📦 Dependency Checker**: Detects unused npm packages and even circular dependencies introduced during AI-assisted coding sessions.
+- **🔍 Dry Run Mode**: See what vibe-janitor would clean up without actually changing anything. Ideal for cautious coders and curious minds.
+- **📝 Insightful Reports**: Generates human-readable and JSON reports of all cleanup actions. Perfect for reviewing the output of your AI-generated projects.
 
 ## 🚀 Installation
 
@@ -115,12 +120,6 @@ vibe-janitor ./path/to/project --remove-unused
 }
 ```
 
-## 📊 Example Output
-
-<p align="center">
-  <img width="700" src="https://raw.githubusercontent.com/TravnikovDev/vibe-janitor/main/docs/vibe-janitor-demo.png" alt="vibe-janitor demo output">
-</p>
-
 ### Detailed Mode Output
 
 With the new `--list` option, you get detailed information about what needs to be cleaned:
@@ -174,7 +173,8 @@ This project is licensed under the GNU General Public License v3.0 (GPL-3.0) - s
 This license ensures that while the software remains open source, any derivative works must also be distributed under the same license terms, giving you as the original author more control over how your work is used and modified.
 
 ## 🙏 Acknowledgments
+Big thanks to the open-source tools that make vibe-janitor possible:
 
-- The TypeScript team for the TS Compiler API
-- ts-morph for making AST manipulation easier
-- depcheck for dependency analysis
+- 🧠 TypeScript — for the powerful Compiler API that lets us deeply understand your code
+- 🧬 ts-morph — for making AST manipulation feel almost natural
+- 🧰 depcheck — for digging through dependencies like a true janitor
